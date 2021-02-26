@@ -14,6 +14,73 @@ int main(int argc, char**argv){
     // @var exit_status -> initially 0, set to 1 if we encounter a EXIT_Failure (strlen(word) > pageWidth)
     // @var count -> how many chars we've printed (including whitespace)
 
+    /*
+        
+        bytes_read = read(...);
+        int count = 0;
+        while(bytes_read > 0){
+
+            for(char c : buffer){
+                if(used exceeds width)
+                    set Exit_status to Exit_Failure
+                
+                // determine what to do with the current character.
+                if(c == newline){
+                    if(newlineDetectedOnce == 0){
+                        newlineDetectedOnce = 1;
+                    }
+                    else{
+                        putchar(newline)
+                        putchar(newline)
+                        count = 0;
+                        newlineDetectedOnce = 0
+                    }
+
+                }
+                else if(c == whitespace && used!= 0){
+                    if(used <= (width -count)){
+                        dump contents in sb // for loop here
+                        reset(*sb);
+                        putchar(whitespace);
+
+                        count+= used+1;
+                    }
+                    else{ // reset count
+                        putchar(newline)
+                        dump contents in sb // for loop here
+                        reset(*sb);
+                        putchar(whitespace);
+
+                        count = used+1;
+                    }
+                }
+                else{
+                    sb.append(c);
+                }
+
+            }
+
+            bytes_Read = read(...);
+        }
+        if(sb->used != 0){
+            if(used <= (width -count)){
+                dump contents in sb // for loop here
+                reset(*sb);
+                putchar(whitespace);
+
+                count+= used+1;
+            }
+            else{ // reset count
+                putchar(newline)
+                dump contents in sb // for loop here
+                reset(*sb);
+                putchar(whitespace);
+
+                count = used+1;
+            }
+        }
+    */
+
 }
 
 /*
@@ -31,10 +98,10 @@ int main(int argc, char**argv){
 
     -> Keep a running string_buffer of every string in buffer, print that string only after you get a whitespace
         -> continue to concat until you find a whitespace, then do some dump logic
-    -> For words that span across buffers (hard), continue to put sb_concat that last string into the sb from Buffer
+    -> For words that span across buffers (hard), continue to put sb_append that last string into the sb from Buffer
     -> Every time you find a whitespace, provided enough of 'count allowance' print the contents of sb to the output line
     
-    -> Must maintain a check to see whether sb->used ever exceed width, if so, we must print it and continue but return EXIT_FAILURE 5: Erorr Conditions
+    -> Must maintain a check to see whether sb->used ever exceed width, if so, we must print it still & continue but return EXIT_FAILURE 5: Erorr Conditions
 
     Variables used to accomplish the task:
     -> string Buffer -> continually append each char you find. Concat would be tougher since you don't have a \0 string so append
