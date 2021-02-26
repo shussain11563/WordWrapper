@@ -7,7 +7,12 @@
 int main(int argc, char**argv){
 
     // @var buffer = char Array to read from a file
+    // @macro BUFFSIZE = (6 Notes: use a macro to define its length), BUFFSIZE >= 1.
     // @var sb = strbuf_t used to store words
+    // @var newlineDetectedOnce = bool value -> 0 if false, 1 if true
+    // @var pageWidth = argv[2]
+    // @var exit_status -> initially 0, set to 1 if we encounter a EXIT_Failure (strlen(word) > pageWidth)
+    // @var count -> how many chars we've printed (including whitespace)
 
 }
 
@@ -32,11 +37,11 @@ int main(int argc, char**argv){
     -> Must maintain a check to see whether sb->used ever exceed width, if so, we must print it and continue but return EXIT_FAILURE 5: Erorr Conditions
 
     Variables used to accomplish the task:
-    -> string Buffer -> continually append
+    -> string Buffer -> continually append each char you find. Concat would be tougher since you don't have a \0 string so append
     -> newLineDetectedOnce 
     -> pageWidth
     -> Count for each line
-    -> exit_status to set to EXIT_FAILURe if fail
+    -> exit_status to set to EXIT_FAILURE if fail
     -> 
 
 */

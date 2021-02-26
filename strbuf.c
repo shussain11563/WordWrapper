@@ -7,6 +7,11 @@
 #define DEBUG 0
 #endif
 
+int sb_reset(strbuf_t *sb){
+    sb->used = 0;
+    sb->data[sb->used] = '\0';
+    return 0;
+}
 
 int sb_init(strbuf_t *sb, size_t length)
 {
