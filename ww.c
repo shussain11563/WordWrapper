@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "strbuf.h"
-#include <strbuf.c>
 
 int main(int argc, char**argv){
 
