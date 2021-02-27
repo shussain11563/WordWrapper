@@ -81,6 +81,7 @@ int algo(int width, int inputFD, int outputFD){
             if(c == '\n'){
                 if(!newlineDetectedOnce){
                     newlineDetectedOnce = 1;
+                    sb_append(&sb, ' ');
                 }
                 else{
                     /* Two consecutive newlines found*/
@@ -108,6 +109,10 @@ int algo(int width, int inputFD, int outputFD){
                 }
             }
             else if(isspace(c) && sb.used!=0){
+                if(newlineDetectedOnce){
+                    newlineDetectedOnce = 0;
+                }
+
                 if(sb.used <= (width-count)){
                     write(outputFD, sb.data, sb.used);
                     count += (sb.used + 1);
@@ -120,10 +125,6 @@ int algo(int width, int inputFD, int outputFD){
                     count = sb.used+1;
                     sb_reset(&sb);
                     write(outputFD, whitespace, 1);
-                }
-
-                if(newlineDetectedOnce){
-                    newlineDetectedOnce = 0;
                 }
             }
             else if(!isspace(c)){
