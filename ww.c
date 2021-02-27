@@ -27,12 +27,12 @@ int main(int argc, char **argv)
 
     fileDescripter = open(argv[2], O_RDONLY)
 
-    if()
+    if(fileDescripter!=1)
     {
 
     }
 
-    //add error check for if first argc is 
+    //add error check   for if first argc is 
 
 
 }
