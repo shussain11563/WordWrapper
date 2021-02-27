@@ -39,6 +39,7 @@ int sb_remove(strbuf_t *sb, char* item){
         *item = sb->data[sb->used];
 
     sb->data[sb->used] = '\0';
+    return 0;
 }
 
 void sb_destroy(strbuf_t *sb)
@@ -89,6 +90,7 @@ int sb_concat(strbuf_t *sb, char *str){
     }
     sb->data[sb->used+count] = '\0';
     sb->used += count;
+    return 0;
 }
 
 int sb_insert(strbuf_t *sb, int index, char item){

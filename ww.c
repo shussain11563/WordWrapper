@@ -1,11 +1,11 @@
-<<<<<<< HEAD
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "strbuf.h"
-#include "isNumber.h" //code to check whether the width is an integer // will test to make sure
+/*#include "isNumber.h" */
+//code to check whether the width is an integer // will test to make sure
 //we have duplicate header files in strbuf.h and isNumber.h
 
 #ifndef BUFSIZE
@@ -14,88 +14,102 @@
 
 int main(int argc, char **argv)
 {
-    //condense and remove redunancy (L17/l2)
-    int fileDescriptor;
-    if(argc!=3 || !isNumber(argv[1])
-    {
+
+    /*if(!isNumber(argv[1])){
         return EXIT_FAILURE;
-    }
-
-
-    fileDescripter = open(argv[2], O_RDONLY)
-
-    if(fileDescripter!=1)
-    {
-        perror(argv[1]);
-        return EXIT_FAILURE;
-    }
-
-    //add error check   for if first argc is 
-
-
-}
-=======
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <ctype.h>
-#include "strbuf.h"
-
-#ifndef BUFSIZE
-#define BUFSIZE 256
-#endif
-
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-int main(int argc, char **argv)
-{
+    }*/
 
     int EXIT_STATUS = EXIT_SUCCESS;
-    int fileDescriptor, bytes, newlineDetectedOnce;
-    char buffer[BUFSIZE];
-    strbuf_t sb;
+    int width = atoi(argv[1]);
+
+    int fileDescriptor = open(argv[2], O_RDONLY);
+    if(fileDescriptor == -1){
+        perror("Invalid File Given.");
+        return EXIT_FAILURE;
+    }
+
+    /* assuming that correct argv[1] and argv[2] */
+    strbuf_t sb; 
     sb_init(&sb, 12);
+    const char newline[1] = {'\n'};
+    const char whitespace[1] = {' '};
+    const char dash[1] = {'-'};
 
-    if (argc != 3)  // temporary check, we're only working with file given and width given for this one
-        return EXIT_FAILURE;
-    
-    fileDescriptor = open(argv[2], O_RDONLY);
+    char buffer[BUFSIZE]; 
+    int bytes = read(fileDescriptor, buffer, BUFSIZE);
+    int count = 0, newlineDetectedOnce = 0;
 
-    if (fileDescriptor == -1) {
-        perror(argv[1]);
-        return EXIT_FAILURE;
-    }
+    for(int w=0; w<width; w++) write(1, dash, 1);
+    write(1, newline, 1);
 
-    //ADD CASE OF ZERO FOR READ <---- 0 IS EOF
+    while (bytes > 0) {
+        for(int i=0; i<BUFSIZE; i++){
+            char c = buffer[i];
+            /* Word longer than column width? */
+            if(sb.used > width){ EXIT_STATUS = EXIT_FAILURE;}
+            if(count >= width){write(1, newline, 1); count = 0;}
 
-    bytes = read(fileDescriptor, buf, BUFSIZE);
-    while (() > 0) {
-        if (DEBUG) {
-            printf("%d bytes: |", bytes);
-            for (i = 0; i < bytes; ++i) {
-            putchar(buf[i]);
+            if(c == '\n'){
+                if(!newlineDetectedOnce){
+                    newlineDetectedOnce = 1;
+                }
+                else{
+                    /* Two consecutive newlines found*/
+                    write(1, newline, 1);
+                    write(1, newline, 1);
+                    count = 0;
+                    newlineDetectedOnce = 0;
+                }
             }
-            putchar('|');
-            putchar('\n');
-            continue;
+            else if(isspace(c) && sb.used!=0){
+                if(sb.used <= (width-count)){
+                    write(1, sb.data, sb.used);
+                    count += (sb.used + 1);
+                    sb_reset(&sb);
+                    write(1, whitespace, 1);
+                }
+                else{
+                    write(1, newline, 1);
+                    write(1, sb.data, sb.used);
+                    count = sb.used+1;
+                    sb_reset(&sb);
+                    write(1, whitespace, 1);
+                    if(count >= width){
+                        write(1, newline, 1);
+                        count = 0;
+                    }
+                }
+
+                if(newlineDetectedOnce){
+                    newlineDetectedOnce = 0;
+                }
+            }
+            else if(!isspace(c)){
+                sb_append(&sb, c);
+                if(newlineDetectedOnce){
+                    newlineDetectedOnce = 0;
+                }
+            }
+        }
+        if(sb.used != 0){
+            if(sb.used <= (width-count)){
+                write(1, sb.data, sb.used);
+                sb_reset(&sb);
+                write(1, whitespace, 1);
+            }
+            else{
+                write(1, newline, 1);
+                write(1, sb.data, sb.used);
+                sb_reset(&sb);
+                write(1, whitespace, 1);
+            }
         }
 
-        for (i = 0; i < bytes; ++i) {
-            buf[i] = toupper(buf[i]);
-        }
-
-        write(1, sb.data, sb.used);
-        }
-
-        if (bytes < 0) {
-            perror("Read error");
+        bytes = read(fileDescriptor, buffer, BUFSIZE);
     }
 
+    write(1, newline, 1);
     close(fileDescriptor);
     sb_destroy(&sb);
     return EXIT_STATUS;
->>>>>>> 8ea7f25bd9f276bd17597914fe647ce4233f4798
 }

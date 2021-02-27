@@ -73,9 +73,12 @@
                         putchar(whitespace);
 
                         count = used+1;
+                        if(count >=widht)
+                            reset count and newline
                     }
                 }
                 else{
+                    set newLIneDetected to false
                     sb.append(c);
                 }
 
