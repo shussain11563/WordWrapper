@@ -14,22 +14,20 @@
 
 int main(int argc, char **argv)
 {
-    //condense and remove redunancy
+    //condense and remove redunancy (L17/l2)
     int fileDescriptor;
-    if(argc!=3)
+    if(argc!=3 || !isNumber(argv[1])
     {
         return EXIT_FAILURE;
     }
-    else if(!isNumber(argv[1]))
-    {
-        return EXIT_FAILURE;
-    }
+
 
     fileDescripter = open(argv[2], O_RDONLY)
 
     if(fileDescripter!=1)
     {
-
+        perror(argv[1]);
+        return EXIT_FAILURE;
     }
 
     //add error check   for if first argc is 
