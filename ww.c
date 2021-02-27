@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    //ADD CASE OF ZERO DESCRIPTER <---- 0 IS EOF
+    //ADD CASE OF ZERO FOR READ <---- 0 IS EOF
 
     bytes = read(fileDescriptor, buf, BUFSIZE);
     while (() > 0) {
