@@ -1,23 +1,41 @@
 <<<<<<< HEAD
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "strbuf.h"
+#include "isNumber.h" //code to check whether the width is an integer // will test to make sure
+//we have duplicate header files in strbuf.h and isNumber.h
+
+#ifndef BUFSIZE
+#define BUFSIZE 256
+#endif
 
 int main(int argc, char **argv)
 {
-    if(argc!=2)
+    //condense and remove redunancy
+    int fileDescriptor;
+    if(argc!=3)
+    {
+        return EXIT_FAILURE;
+    }
+    else if(!isNumber(argv[1]))
+    {
+        return EXIT_FAILURE;
+    }
+
+    fileDescripter = open(argv[2], O_RDONLY)
+
+    if()
     {
 
     }
-    else if
-    {
-        
-    }
-    else if(
 
     //add error check for if first argc is 
 
 
-
+}
 =======
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,6 +70,8 @@ int main(int argc, char **argv)
         perror(argv[1]);
         return EXIT_FAILURE;
     }
+
+    //ADD CASE OF ZERO DESCRIPTER <---- 0 IS EOF
 
     bytes = read(fileDescriptor, buf, BUFSIZE);
     while (() > 0) {
