@@ -12,7 +12,7 @@ int isNumber(char* stringReg)
         if(!(isdigit(stringReg[i])))
         {
             condition = 0;
-            return condition;
+            return condition; //return 0; <----change to this 
         }
         i++;
     }
