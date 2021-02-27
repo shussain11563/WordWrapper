@@ -10,4 +10,4 @@ Individual fisherman have an incentive to catch as many fish as possible. Howeve
 
 Unchecked, this can lead to a collapse in fish stocks due to over-fishing.
 
-If one individual fisherman holds back on his catch to try and preserve overall fish stocks, it may prove futile because many other fishermen continue to catch as much as possible. The net result is that fisherman don’t have any incentive to hold back, so they might as well try and catch as much as possible.
+If one individual fisherman holds back on his catch to try and preserve overall fish stocks, it may prove futile because many other fishermen continue to catch as much as possible!
