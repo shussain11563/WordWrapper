@@ -28,11 +28,12 @@ int algo(int, int, int);
 int main(int argc, char **argv)
 {
 
+    int EXIT_STATUS = EXIT_SUCCESS;
+
     /*if(!isNumber(argv[1])){
         return EXIT_FAILURE;
     }*/
 
-    int EXIT_STATUS = EXIT_SUCCESS;
     int width = atoi(argv[1]);
 
     int inputFD= open(argv[2], O_RDONLY);
@@ -52,25 +53,33 @@ int main(int argc, char **argv)
     return EXIT_STATUS;
 }
 
-/* Does not concern itself with opening/closing files */
+/*
+    @var width - argv[1]
+    @var inputFD - fileDescriptor of file to read from
+    @var outputFD - fileDescriptor of file to write to
+
+    This function does not handle opening and closing of files.
+    That is a task in main method. This is a silo-d algorithm
+    which does the word wrapping job.
+*/
 int algo(int width, int inputFD, int outputFD){
     int EXIT_STATUS = EXIT_SUCCESS;
-    
-    // inputFD = input File Descriptor to read from.
-    // outputFD = File Descriptor to write to.
 
     strbuf_t sb; 
     sb_init(&sb, 12);
+
     const char newline[1] = {'\n'};
     const char whitespace[1] = {' '};
-    const char dash[1] = {'-'};
+    
     char buffer[BUFSIZE]; 
-    int bytes = read(inputFD, buffer, BUFSIZE);
     int count = 0, newlineDetectedOnce = 0;
 
+    // Here to visualize width and compare output.
+    const char dash[1] = {'-'};
     for(int w=0; w<width; w++) write(outputFD, dash, 1);
     write(1, newline, 1);
 
+    int bytes = read(inputFD, buffer, BUFSIZE);
     while (bytes > 0) {
         for(int i=0; i<bytes; i++){
             char c = buffer[i];
@@ -170,7 +179,7 @@ int algo(int width, int inputFD, int outputFD){
         bytes = read(inputFD, buffer, BUFSIZE);
     }
 
-
+    // Having parsed last buffer, handle anything left in sb.
     if(sb.used != 0){
         if(sb.used > (width-count)){
             write(outputFD, newline, 1);
@@ -181,7 +190,7 @@ int algo(int width, int inputFD, int outputFD){
     }
 
     write(outputFD, newline, 1);
+    sb_destroy(&sb); // clear space allocated for string.
 
-    sb_destroy(&sb);
     return EXIT_STATUS;
 }
