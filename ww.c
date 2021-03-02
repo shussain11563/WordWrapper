@@ -81,22 +81,48 @@ int algo(int width, int inputFD, int outputFD){
             if(c == '\n'){
                 if(!newlineDetectedOnce){
                     newlineDetectedOnce = 1;
-                    sb_append(&sb, ' ');
+
+                    if(sb.used <= (width-count)){
+                        write(outputFD, sb.data, sb.used);
+                        count += sb.used;
+                        if(count != width && sb.used != 0){
+                            write(outputFD, whitespace, 1);
+                            ++count;
+                        }
+                        sb_reset(&sb);
+                    }
+                    else{
+                        write(outputFD, newline, 1);
+                        write(outputFD, sb.data, sb.used);
+                        count = sb.used;
+                        if(count != width && sb.used != 0){
+                            write(outputFD, whitespace, 1);
+                            ++count;
+                        }
+                        sb_reset(&sb);
+                    }
                 }
                 else{
                     /* Two consecutive newlines found*/
                     if(sb.used <= (width-count)){
                         write(outputFD, sb.data, sb.used);
-                        count += (sb.used + 1);
-                        sb_reset(&sb);
-                        write(outputFD, whitespace, 1);
+                        count += sb.used;
+                        if(count != width && sb.used != 0){
+                            write(outputFD, whitespace, 1);
+                            ++count;
+                        }
+                        sb_reset(&sb);                          
                     }
                     else{
                         write(outputFD, newline, 1);
                         write(outputFD, sb.data, sb.used);
-                        count = sb.used+1;
+                        count = sb.used;
+                        if(count != width && sb.used != 0){
+                            write(outputFD, whitespace, 1);
+                            ++count;
+                        }
                         sb_reset(&sb);
-                        write(outputFD, whitespace, 1);
+                        
                         if(count >= width){
                             write(outputFD, newline, 1);
                             count = 0;
@@ -115,16 +141,22 @@ int algo(int width, int inputFD, int outputFD){
 
                 if(sb.used <= (width-count)){
                     write(outputFD, sb.data, sb.used);
-                    count += (sb.used + 1);
+                    count += sb.used;
                     sb_reset(&sb);
-                    write(outputFD, whitespace, 1);
+                    if(count != width){
+                        write(outputFD, whitespace, 1);
+                        ++count;
+                    }
                 }
                 else{
                     write(outputFD, newline, 1);
                     write(outputFD, sb.data, sb.used);
-                    count = sb.used+1;
+                    count = sb.used;
                     sb_reset(&sb);
-                    write(outputFD, whitespace, 1);
+                    if(count != width){
+                        write(outputFD, whitespace, 1);
+                        ++count;
+                    }
                 }
             }
             else if(!isspace(c)){
