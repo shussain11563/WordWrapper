@@ -15,7 +15,7 @@
 
 
 int algo(int, int, int);
-
+int algoTEST(int, int, int);
 
 /*
     parts missing:
@@ -28,7 +28,7 @@ int algo(int, int, int);
 int main(int argc, char **argv)
 {
 
-    int EXIT_STATUS = EXIT_SUCCESS;
+    int EXIT_STATUS;
 
     /*if(!isNumber(argv[1])){
         return EXIT_FAILURE;
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     int outputFD = 1;
 
     // algorithm (width, inputfile fd, outputfile fd)
-    algo(width, inputFD, outputFD);
+    EXIT_STATUS = algoTEST(width, inputFD, outputFD);
 
     close(inputFD);
     close(outputFD);
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     That is a task in main method. This is a silo-d algorithm
     which does the word wrapping job.
 */
-int algo(int width, int inputFD, int outputFD){
+int algoTEST(int width, int inputFD, int outputFD){
     int EXIT_STATUS = EXIT_SUCCESS;
 
     strbuf_t sb; 
@@ -90,82 +90,48 @@ int algo(int width, int inputFD, int outputFD){
             if(c == '\n'){
                 if(!newlineDetectedOnce){
                     newlineDetectedOnce = 1;
-
-                    if(sb.used <= (width-count)){
-                        write(outputFD, sb.data, sb.used);
-                        count += sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
+                    if(sb.used != 0){
+                        if(sb.used < (width-count)){
+                            if(count != 0){
+                                write(outputFD, whitespace, 1);
+                            }
+                            write(outputFD, sb.data, sb.used);
+                            count += sb.used+1;
+                            sb_reset(&sb);
                         }
-                        sb_reset(&sb);
-                    }
-                    else{
-                        write(outputFD, newline, 1);
-                        write(outputFD, sb.data, sb.used);
-                        count = sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
+                        else{
+                            write(outputFD, newline, 1);
+                            write(outputFD, sb.data, sb.used);
+                            count = sb.used;
+                            sb_reset(&sb);
                         }
-                        sb_reset(&sb);
                     }
                 }
                 else{
                     /* Two consecutive newlines found*/
-                    if(sb.used <= (width-count)){
-                        write(outputFD, sb.data, sb.used);
-                        count += sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
-                        }
-                        sb_reset(&sb);                          
-                    }
-                    else{
-                        write(outputFD, newline, 1);
-                        write(outputFD, sb.data, sb.used);
-                        count = sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
-                        }
-                        sb_reset(&sb);
-                        
-                        if(count >= width){
-                            write(outputFD, newline, 1);
-                            count = 0;
-                        }
-                    }
                     write(outputFD, newline, 1);
                     write(outputFD, newline, 1);
                     count = 0;
-                    newlineDetectedOnce = 0;
                 }
             }
             else if(isspace(c) && sb.used!=0){
-                if(newlineDetectedOnce){
+                if(newlineDetectedOnce){ // If only one line separator, reset it.
                     newlineDetectedOnce = 0;
                 }
 
-                if(sb.used <= (width-count)){
-                    write(outputFD, sb.data, sb.used);
-                    count += sb.used;
-                    sb_reset(&sb);
-                    if(count != width){
+                if(sb.used < (width-count)){
+                    if(count != 0){
                         write(outputFD, whitespace, 1);
-                        ++count;
                     }
+                    write(outputFD, sb.data, sb.used);
+                    count += sb.used+1;
+                    sb_reset(&sb);
                 }
                 else{
                     write(outputFD, newline, 1);
                     write(outputFD, sb.data, sb.used);
                     count = sb.used;
                     sb_reset(&sb);
-                    if(count != width){
-                        write(outputFD, whitespace, 1);
-                        ++count;
-                    }
                 }
             }
             else if(!isspace(c)){
@@ -181,12 +147,18 @@ int algo(int width, int inputFD, int outputFD){
 
     // Having parsed last buffer, handle anything left in sb.
     if(sb.used != 0){
-        if(sb.used > (width-count)){
-            write(outputFD, newline, 1);
+       if(sb.used < (width-count)){
+            if(count != 0){
+                write(outputFD, whitespace, 1);
+            }
+            write(outputFD, sb.data, sb.used);
+            sb_reset(&sb);
         }
-
-        write(outputFD, sb.data, sb.used);
-        sb_reset(&sb);
+        else{
+            write(outputFD, newline, 1);
+            write(outputFD, sb.data, sb.used);
+            sb_reset(&sb);
+        }
     }
 
     write(outputFD, newline, 1);
