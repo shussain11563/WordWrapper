@@ -127,6 +127,20 @@ char* generateFilePath(char* directoryName, char* filePath)
         return ret;
 }
 
+char* generateCurrentPath(char* directoryName, char* filePath)
+{
+        strbuf_t path;
+        sb_init(&path, 10);
+        sb_concat(&path, directoryName);
+        sb_append(&path, '/');
+        //sb_concat(&path, "wrap.");
+        sb_concat(&path, filePath);
+        char* ret = malloc(sizeof(char)*path.length);
+        strcpy(ret, path.data);
+        sb_destroy(&path);
+        return ret;
+}
+
 
 int prefixContains(char* prefix, char* word)
 {
@@ -153,10 +167,31 @@ int main(int argc, char **argv)
             if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
             {
                 char* newFilePath = generateFilePath(argv[1], de->d_name);
+                char* currentPath = generateCurrentPath(argv[1], de->d_name);
+                puts(currentPath);
                 puts(newFilePath);
+                
+                
+                int inputFD = open(currentPath, O_RDONLY);
+                if(inputFD == -1)   
+                {
+                    perror("Invalid Input File Given.");
+                    return EXIT_FAILURE;
+                }
+
+                char buf[20];
+                int bytesRead = read(inputFD, buf, 20);
+                close(inputFD);
+                
                 int fd = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
-                free(newFilePath);
+                write(fd, buf, bytesRead);
                 close(fd);
+                
+
+                //int fd = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                free(newFilePath);
+                free(currentPath);
+                //close(fd);
             }
 
             

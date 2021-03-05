@@ -54,6 +54,20 @@ char* generateFilePath(char* directoryName, char* filePath)
     sb_destroy(&path);
     return ret;
 }
+//add third argument regarding whether to add "wrap." and delete duplicate
+char* generateCurrentPath(char* directoryName, char* filePath)
+{
+        strbuf_t path;
+        sb_init(&path, 10);
+        sb_concat(&path, directoryName);
+        sb_append(&path, '/');
+        //sb_concat(&path, "wrap.");
+        sb_concat(&path, filePath);
+        char* ret = malloc(sizeof(char)*path.length);
+        strcpy(ret, path.data);
+        sb_destroy(&path);
+        return ret;
+}
 
 int prefixContains(char* prefix, char* word)
 {
@@ -98,8 +112,14 @@ int main(int argc, char **argv)
             {
 
                 char* newFilePath = generateFilePath(argv[1], de->d_name);
-
-                int inputFD = open()
+                char* currentPath = generateCurrentPath(argv[1], de->d_name);
+                
+                int inputFD = open(currentPath, O_RDONLY);
+                if(inputFD == -1)   
+                {
+                    perror("Invalid Input File Given.");
+                    return EXIT_FAILURE; //<--------------remove this????
+                }
 
                 int outputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
                 close(fd);
@@ -110,6 +130,7 @@ int main(int argc, char **argv)
                 //DEPENDS ON ASSUMPTIONS !!!!!
 
                 free(newFilePath);
+                free(currentPath)
 
                 /*
                 if(inputFD == -1)
