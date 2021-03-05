@@ -4,6 +4,9 @@ CFLAGS= -g -std=c99 -Wall -Wvla -fsanitize=address,undefined
 #remove -WVLA ---> "Warn if a variable-length array is used in the code. -Wno-vla prevents the -Wpedantic warning of the variable-length array.
 LFLAGS=-lm
 
+
+#gcc -g -o -std=c99 -Wall -Wvla -fsanitize=address test.c test
+
 %.o: %.c %.h
 	gcc $(CFLAGS) -c $@ $< $(LFLAGS)
 

@@ -113,42 +113,25 @@ void dump(strbuf_t *sb)
     putchar('\n');
 }
 
-void generateFilePath(char* directoryName, char* filePath)
+char* generateFilePath(char* directoryName, char* filePath)
 {
-    strbuf_t path;
-    sb_init(&path, 10);
-    sb_concat(&path, directoryName);
-    sb_append(&path, '/');
-
-    sb_concat(&path, "wrap.");
-    sb_concat(&path, filePath);
-
-
-
-    //strbuf_t path; 
-    /* 
-    sb_init(&cursor, 10);
-    sb_concat(&cursor, "wrap.");
-    sb_concat(&cursor, filePath);
-
-    strbuf_t path; 
-    sb_init(&path, 10);         
-    sb_concat(&path, directoryName);
-    sb_append(&path, '/');
-    sb_concat(&path, cursor.data);
-
-    puts(path.data);
-    sb_destroy(&cursor);
-    sb_destroy(&path);
-    */
-
+        strbuf_t path;
+        sb_init(&path, 10);
+        sb_concat(&path, directoryName);
+        sb_append(&path, '/');
+        sb_concat(&path, "wrap.");
+        sb_concat(&path, filePath);
+        char* ret = malloc(sizeof(char)*path.length);
+        strcpy(ret, path.data);
+        sb_destroy(&path);
+        return ret;
 }
 
 int main(int argc, char **argv)
 {
-    struct stat data;
+    
     //Here const char *path specifies the name of the file. If the path of file is a symbolic link then you need to specify the link instead of file name.
-    int fileMode = stat(argv[1], &data);
+    
 
     if(isDir(argv[1]))
     {
@@ -158,9 +141,16 @@ int main(int argc, char **argv)
         de = readdir(dirp);
         while(de)
         {
-            char* test = de->d_name;
-            generateFilePath(argv[1], test);
-            //puts(test);
+            //char* test = de->d_name;
+            if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
+            {
+
+                char* newFilePath = generateFilePath(argv[1], de->d_name);
+                puts(newFilePath);
+                int fd = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                free(newFilePath);
+            }
+
             
             
         /*

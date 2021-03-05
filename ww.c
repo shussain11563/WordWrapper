@@ -41,6 +41,20 @@ int isDir(char* file)
     return isDir;
 }
 
+char* generateFilePath(char* directoryName, char* filePath)
+{
+    strbuf_t path;
+    sb_init(&path, 10);
+    sb_concat(&path, directoryName);
+    sb_append(&path, '/');
+    sb_concat(&path, "wrap.");
+    sb_concat(&path, filePath);
+    char* ret = malloc(sizeof(char)*path.length);
+    strcpy(ret, path.data);
+    sb_destroy(&path);
+    return ret;
+}
+
 /*
     parts missing:
         error checks on program call input
@@ -70,15 +84,26 @@ int main(int argc, char **argv)
 
         while(de = readdir(dirp))
         {
-            //puts(de->d_name);
-            //make everything into a method to call 
-            inputFD=open()
+            if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
+            {
+                char* newFilePath = generateFilePath(argv[1], de->d_name);
+
+                int inputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
+
+                free(newFilePath);
+
+                /*
+                if(inputFD == -1)
+                {
+                    perror("Cannot Create File.")
+                    //return EXIT_FAILURE;
+                }
+                */
+            }
+
             
             
         }
-        
-
-
         closedir(dirp);
     }
     else
