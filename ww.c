@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "strbuf.h"
+#include <sys/stat.h> //can just write stat.h, cause fctnl.h is also in sys
+#include <dirent.h>
 /*#include "isNumber.h" */
 //code to check whether the width is an integer // will test to make sure
 //we have duplicate header files in strbuf.h and isNumber.h
@@ -16,6 +18,61 @@
 
 int algo(int, int, int);
 int algoTEST(int, int, int);
+
+//add to seperate header file or .c file or put in isNumber.c
+int isDir(char* file)
+{
+    int isDir = 0;
+    struct stat data;
+    int fileMode = stat(file, &data);
+
+    if(S_ISDIR(data.st_mode))
+    {
+        printf("This is a directory\n");
+        isDir = 1;
+
+    }
+    else if(S_ISREG(data.st_mode))
+    {
+        printf("This is a regular file\n");
+        isDir = 0;
+    }
+
+    return isDir;
+}
+
+char* generateFilePath(char* directoryName, char* filePath)
+{
+    strbuf_t path;
+    sb_init(&path, 10);
+    sb_concat(&path, directoryName);
+    sb_append(&path, '/');
+    sb_concat(&path, "wrap.");
+    sb_concat(&path, filePath);
+    char* ret = malloc(sizeof(char)*path.length);
+    strcpy(ret, path.data);
+    sb_destroy(&path);
+    return ret;
+}
+//add third argument regarding whether to add "wrap." and delete duplicate
+char* generateCurrentPath(char* directoryName, char* filePath)
+{
+        strbuf_t path;
+        sb_init(&path, 10);
+        sb_concat(&path, directoryName);
+        sb_append(&path, '/');
+        //sb_concat(&path, "wrap.");
+        sb_concat(&path, filePath);
+        char* ret = malloc(sizeof(char)*path.length);
+        strcpy(ret, path.data);
+        sb_destroy(&path);
+        return ret;
+}
+
+int prefixContains(char* prefix, char* word)
+{
+    return strncmp(prefix, word, strlen(prefix)) == 0;
+}
 
 /*
     parts missing:
@@ -36,11 +93,78 @@ int main(int argc, char **argv)
 
     int width = atoi(argv[1]);
 
-    int inputFD= open(argv[2], O_RDONLY);
-    if(inputFD == -1){
-        perror("Invalid Input File Given.");
-        return EXIT_FAILURE;
+    //int mode = stat(argv[2]);
+    int inputFD;
+    if(isDir(argv[2]))
+    {
+        //directory logic
+        DIR* dirp = opendir(argv[2]);
+        struct dirent* de;
+
+        while(de = readdir(dirp))
+        {
+            
+            if(prefixContains("wrap.", de->d_name))
+            {
+                continue;
+            }
+            if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
+            {
+
+                char* newFilePath = generateFilePath(argv[1], de->d_name);
+                char* currentPath = generateCurrentPath(argv[1], de->d_name);
+                
+                int inputFD = open(currentPath, O_RDONLY);
+                if(inputFD == -1)   
+                {
+                    perror("Invalid Input File Given.");
+                    return EXIT_FAILURE; //<--------------remove this????
+                }
+
+                int outputFD = open(generateCurrentPath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                EXIT_STATUS = algoTEST(width, inputFD, outputFD);
+
+                //change AlgoTest method to add multiple file descriptors-->nvm, its already done
+
+                //int outputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
+                //close(fd);
+
+                //create char** and use as a lookup table to prevent duplicates
+                //creates wrap.wrap.wrap bar
+                //ignore files with "wrap." prefix
+                //DEPENDS ON ASSUMPTIONS !!!!!
+
+                close(inputFD, outputFD);
+                close(outputFD);
+                free(newFilePath);
+                free(currentPath)
+
+                /*
+                if(inputFD == -1)
+                {
+                    perror("Cannot Create File.")
+                    //return EXIT_FAILURE;
+                }
+                */
+            }
+
+            
+            
+        }
+        closedir(dirp);
     }
+    else
+    {
+        inputFD = open(argv[2], O_RDONLY);
+        if(inputFD == -1)   
+        {
+            perror("Invalid Input File Given.");
+            return EXIT_FAILURE;
+        }
+    }
+
+
+    
 
     int outputFD = 1;
 
@@ -161,7 +285,7 @@ int algoTEST(int width, int inputFD, int outputFD){
         }
     }
 
-    write(outputFD, newline, 1);
+    write(outputFD, newline, 1); //<-----
     sb_destroy(&sb); // clear space allocated for string.
 
     return EXIT_STATUS;
