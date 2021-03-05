@@ -135,6 +135,7 @@ int main(int argc, char **argv)
                 //DEPENDS ON ASSUMPTIONS !!!!!
 
                 close(inputFD, outputFD);
+                close(outputFD);
                 free(newFilePath);
                 free(currentPath)
 

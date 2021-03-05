@@ -159,18 +159,19 @@ int main(int argc, char **argv)
         struct dirent* de;
         while(de = readdir(dirp))
         {
+            
             if(prefixContains("wrap.", de->d_name))
             {
                 continue;
             }
+            
             //char* test = de->d_name;
             if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
             {
                 char* newFilePath = generateFilePath(argv[1], de->d_name);
                 char* currentPath = generateCurrentPath(argv[1], de->d_name);
                 puts(currentPath);
-                puts(newFilePath);
-                
+        
                 
                 int inputFD = open(currentPath, O_RDONLY);
                 if(inputFD == -1)   
