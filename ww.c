@@ -19,6 +19,28 @@
 int algo(int, int, int);
 int algoTEST(int, int, int);
 
+//add to seperate header file or .c file or put in isNumber.c
+int isDir(char* file)
+{
+    int isDir = 0;
+    struct stat data;
+    int fileMode = stat(file, &data);
+
+    if(S_ISDIR(data.st_mode))
+    {
+        printf("This is a directory\n");
+        isDir = 1;
+
+    }
+    else if(S_ISREG(data.st_mode))
+    {
+        printf("This is a regular file\n");
+        isDir = 0;
+    }
+
+    return isDir;
+}
+
 /*
     parts missing:
         error checks on program call input
@@ -38,15 +60,37 @@ int main(int argc, char **argv)
 
     int width = atoi(argv[1]);
 
-    //int mode = stat(argv[1]);
+    //int mode = stat(argv[2]);
+    int inputFD;
+    if(isDir(argv[2]))
+    {
+        //directory logic
+        DIR* dirp = opendir(argv[2]);
+        struct dirent* de;
+
+        while(de = readdir(dirp))
+        {
+            //puts(de->d_name);
+            //make everything into a method to call 
+            inputFD=open()
+            
+            
+        }
+        
 
 
-
-    int inputFD= open(argv[2], O_RDONLY);
-    if(inputFD == -1){
-        perror("Invalid Input File Given.");
-        return EXIT_FAILURE;
+        closedir(dirp);
     }
+    else
+    {
+        inputFD = open(argv[2], O_RDONLY);
+        if(inputFD == -1)   
+        {
+            perror("Invalid Input File Given.");
+            return EXIT_FAILURE;
+        }
+    }
+
 
     
 
@@ -169,7 +213,7 @@ int algoTEST(int width, int inputFD, int outputFD){
         }
     }
 
-    write(outputFD, newline, 1);
+    write(outputFD, newline, 1); //<-----
     sb_destroy(&sb); // clear space allocated for string.
 
     return EXIT_STATUS;
