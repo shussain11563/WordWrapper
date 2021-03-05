@@ -121,14 +121,20 @@ int main(int argc, char **argv)
                     return EXIT_FAILURE; //<--------------remove this????
                 }
 
-                int outputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
-                close(fd);
+                int outputFD = open(generateCurrentPath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                EXIT_STATUS = algoTEST(width, inputFD, outputFD);
+
+                //change AlgoTest method to add multiple file descriptors-->nvm, its already done
+
+                //int outputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
+                //close(fd);
 
                 //create char** and use as a lookup table to prevent duplicates
                 //creates wrap.wrap.wrap bar
                 //ignore files with "wrap." prefix
                 //DEPENDS ON ASSUMPTIONS !!!!!
 
+                close(inputFD, outputFD);
                 free(newFilePath);
                 free(currentPath)
 
