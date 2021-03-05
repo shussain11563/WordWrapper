@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "strbuf.h"
+#include <sys/stat.h> //can just write stat.h, cause fctnl.h is also in sys
+#include <dirent.h>
 /*#include "isNumber.h" */
 //code to check whether the width is an integer // will test to make sure
 //we have duplicate header files in strbuf.h and isNumber.h
@@ -36,11 +38,17 @@ int main(int argc, char **argv)
 
     int width = atoi(argv[1]);
 
+    //int mode = stat(argv[1]);
+
+
+
     int inputFD= open(argv[2], O_RDONLY);
     if(inputFD == -1){
         perror("Invalid Input File Given.");
         return EXIT_FAILURE;
     }
+
+    
 
     int outputFD = 1;
 

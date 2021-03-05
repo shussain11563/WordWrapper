@@ -1,14 +1,16 @@
-int isNumber(char* stringReg)
+int isPositiveNumber(char* stringReg)
 {
     int condition = 1;
     int i = 0;
     while(!(stringReg[i]=='\0'))
     {
-        if(stringReg[i]=='-' || stringReg[i]=='+')
+        /*
+        if(stringReg[i]=='+')
         {
             i++;
             continue;
         }
+        */ //<----depends on assumption
         if(!(isdigit(stringReg[i])))
         {
             condition = 0;
