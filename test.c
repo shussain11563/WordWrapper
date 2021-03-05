@@ -127,6 +127,12 @@ char* generateFilePath(char* directoryName, char* filePath)
         return ret;
 }
 
+
+int prefixContains(char* prefix, char* word)
+{
+    return strncmp(prefix, word, strlen(prefix)) == 0;
+}
+
 int main(int argc, char **argv)
 {
     
@@ -137,18 +143,20 @@ int main(int argc, char **argv)
     {
        DIR* dirp = opendir(argv[1]);
         struct dirent* de;
-
-        de = readdir(dirp);
-        while(de)
+        while(de = readdir(dirp))
         {
+            if(prefixContains("wrap.", de->d_name))
+            {
+                continue;
+            }
             //char* test = de->d_name;
             if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
             {
-
                 char* newFilePath = generateFilePath(argv[1], de->d_name);
                 puts(newFilePath);
                 int fd = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
                 free(newFilePath);
+                close(fd);
             }
 
             
@@ -179,7 +187,6 @@ int main(int argc, char **argv)
             //close(fd);
 
 
-            de = readdir(dirp);
 
             
             

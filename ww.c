@@ -55,6 +55,11 @@ char* generateFilePath(char* directoryName, char* filePath)
     return ret;
 }
 
+int prefixContains(char* prefix, char* word)
+{
+    return strncmp(prefix, word, strlen(prefix)) == 0;
+}
+
 /*
     parts missing:
         error checks on program call input
@@ -84,11 +89,25 @@ int main(int argc, char **argv)
 
         while(de = readdir(dirp))
         {
+            
+            if(prefixContains("wrap.", de->d_name))
+            {
+                continue;
+            }
             if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
             {
+
                 char* newFilePath = generateFilePath(argv[1], de->d_name);
 
-                int inputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
+                int inputFD = open()
+
+                int outputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
+                close(fd);
+
+                //create char** and use as a lookup table to prevent duplicates
+                //creates wrap.wrap.wrap bar
+                //ignore files with "wrap." prefix
+                //DEPENDS ON ASSUMPTIONS !!!!!
 
                 free(newFilePath);
 
