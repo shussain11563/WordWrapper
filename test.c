@@ -113,7 +113,36 @@ void dump(strbuf_t *sb)
     putchar('\n');
 }
 
+void generateFilePath(char* directoryName, char* filePath)
+{
+    strbuf_t path;
+    sb_init(&path, 10);
+    sb_concat(&path, directoryName);
+    sb_append(&path, '/');
 
+    sb_concat(&path, "wrap.");
+    sb_concat(&path, filePath);
+
+
+
+    //strbuf_t path; 
+    /* 
+    sb_init(&cursor, 10);
+    sb_concat(&cursor, "wrap.");
+    sb_concat(&cursor, filePath);
+
+    strbuf_t path; 
+    sb_init(&path, 10);         
+    sb_concat(&path, directoryName);
+    sb_append(&path, '/');
+    sb_concat(&path, cursor.data);
+
+    puts(path.data);
+    sb_destroy(&cursor);
+    sb_destroy(&path);
+    */
+
+}
 
 int main(int argc, char **argv)
 {
@@ -130,8 +159,11 @@ int main(int argc, char **argv)
         while(de)
         {
             char* test = de->d_name;
-            puts(test);
-
+            generateFilePath(argv[1], test);
+            //puts(test);
+            
+            
+        /*
             strbuf_t cursor; 
             sb_init(&cursor, 10);
             sb_concat(&cursor, "wrap.");
@@ -145,13 +177,16 @@ int main(int argc, char **argv)
             sb_concat(&path, argv[1]);
             sb_append(&path, '/');
             sb_concat(&path, cursor.data);
-            printf("NewFileName is %s \n", path.data);
+
+        */
+            //printf("NewFileName is %s \n", path.data);
             //get file directory name
             //example/data
-            int fd = open(path.data,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
+            //int fd = open(path.data,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
 
+                //creates wrap.wrap.wrap bar
             //ignore files with "wrap." prefix
-            close(fd);
+            //close(fd);
 
 
             de = readdir(dirp);
