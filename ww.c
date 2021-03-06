@@ -14,33 +14,106 @@
 #define BUFSIZE 256
 #endif
 
-
-
+char* generateFilePath(char*, char*);
+char* generateCurrentPath(char*, char*);
+int prefixContains(char*, char*);
 int algo(int, int, int);
-int algoTEST(int, int, int);
 
-//add to seperate header file or .c file or put in isNumber.c
-int isDir(char* file)
+
+/*
+    parts missing:
+        error checks on program call input
+        determining what the input file and output file is
+        if directory -> a loop to complete the step for all files.
+            -> will need O_CREATE flag to make the outputfile.wrap files.
+
+*/
+int main(int argc, char **argv)
 {
-    int isDir = 0;
-    struct stat data;
-    int fileMode = stat(file, &data);
 
-    if(S_ISDIR(data.st_mode))
-    {
-        printf("This is a directory\n");
-        isDir = 1;
+    // argc = 2 or argc = 3
+    
+    
+    int EXIT_STATUS;
+    
 
+    /* CHECK THIS THING */
+    int width = atoi(argv[1]);
+
+    int inputFD;
+
+    // yet to do - permissions
+    if(argc == 2){
+        // only stdin to stdout stuff
+        // don't have to worry about permissions
     }
-    else if(S_ISREG(data.st_mode))
-    {
-        printf("This is a regular file\n");
-        isDir = 0;
+    else if(argc == 3){
+        int isDir = 0;
+        struct stat data;
+        int fileMode = stat(argv[2], &data);
+
+        if(S_ISDIR(data.st_mode)) // argv2 is a directory
+        {
+            //directory logic
+            DIR* dirp = opendir(argv[2]);
+            struct dirent* de;
+
+            while(de = readdir(dirp))
+            {
+                
+                if(prefixContains("wrap.", de->d_name))
+                {
+                    continue;
+                }
+                if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
+                { // DT_REG - type of regular files
+
+                    char* newFilePath = generateFilePath(argv[2], de->d_name);
+                    char* currentPath = generateCurrentPath(argv[2], de->d_name);
+                    
+                    int inputFD = open(currentPath, O_RDONLY);
+                    if(inputFD == -1)   
+                    {
+                        perror("Invalid Input File Given.");
+                        return EXIT_FAILURE; //<--------------remove this????
+                    }
+
+                    int outputFD = open(generateFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                    EXIT_STATUS = algo(width, inputFD, outputFD);
+
+                    close(inputFD);
+                    close(outputFD);
+                    free(newFilePath);
+                    free(currentPath);
+                }
+            } 
+            closedir(dirp);
+        }
+        else if(S_ISREG(data.st_mode)) // argv2 is a file
+        {
+            inputFD = open(argv[2], O_RDONLY);
+            if(inputFD == -1)   
+            {
+                perror("Invalid Input File Given.");
+                return EXIT_FAILURE;
+            }
+
+            EXIT_STATUS = algo(width, inputFD, STDOUT_FILENO);
+            close(inputFD);
+            close(STDOUT_FILENO);
+        }
+        else
+        {
+            // else neither a file or a dir
+            perror("argv[2] neither a file nor dir");
+            return EXIT_FAILURE;   
+        }
     }
 
-    return isDir;
+    return EXIT_STATUS;
 }
 
+// wrap.file in that directory for that specific file
 char* generateFilePath(char* directoryName, char* filePath)
 {
     strbuf_t path;
@@ -57,16 +130,16 @@ char* generateFilePath(char* directoryName, char* filePath)
 //add third argument regarding whether to add "wrap." and delete duplicate
 char* generateCurrentPath(char* directoryName, char* filePath)
 {
-        strbuf_t path;
-        sb_init(&path, 10);
-        sb_concat(&path, directoryName);
-        sb_append(&path, '/');
-        //sb_concat(&path, "wrap.");
-        sb_concat(&path, filePath);
-        char* ret = malloc(sizeof(char)*path.length);
-        strcpy(ret, path.data);
-        sb_destroy(&path);
-        return ret;
+    strbuf_t path;
+    sb_init(&path, 10);
+    sb_concat(&path, directoryName);
+    sb_append(&path, '/');
+    //sb_concat(&path, "wrap.");
+    sb_concat(&path, filePath);
+    char* ret = malloc(sizeof(char)*path.length);
+    strcpy(ret, path.data);
+    sb_destroy(&path);
+    return ret;
 }
 
 int prefixContains(char* prefix, char* word)
@@ -74,110 +147,7 @@ int prefixContains(char* prefix, char* word)
     return strncmp(prefix, word, strlen(prefix)) == 0;
 }
 
-/*
-    parts missing:
-        error checks on program call input
-        determining what the input file and output file is
-        if directory -> a loop to complete the step for all files.
-            -> will need O_CREATE flag to make the outputfile.wrap files.
-
-*/
-int main(int argc, char **argv)
-{
-
-    int EXIT_STATUS;
-
-    /*if(!isNumber(argv[1])){
-        return EXIT_FAILURE;
-    }*/
-
-    int width = atoi(argv[1]);
-
-    //int mode = stat(argv[2]);
-    int inputFD;
-    if(isDir(argv[2]))
-    {
-        //directory logic
-        DIR* dirp = opendir(argv[2]);
-        struct dirent* de;
-
-        while(de = readdir(dirp))
-        {
-            
-            if(prefixContains("wrap.", de->d_name))
-            {
-                continue;
-            }
-            if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
-            {
-
-                char* newFilePath = generateFilePath(argv[1], de->d_name);
-                char* currentPath = generateCurrentPath(argv[1], de->d_name);
-                
-                int inputFD = open(currentPath, O_RDONLY);
-                if(inputFD == -1)   
-                {
-                    perror("Invalid Input File Given.");
-                    return EXIT_FAILURE; //<--------------remove this????
-                }
-
-                int outputFD = open(generateCurrentPath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
-                EXIT_STATUS = algoTEST(width, inputFD, outputFD);
-
-                //change AlgoTest method to add multiple file descriptors-->nvm, its already done
-
-                //int outputFD = open(newFilePath,  O_WRONLY | O_APPEND | O_CREAT, 0777); //O_APPEND --> O_TRUNC
-                //close(fd);
-
-                //create char** and use as a lookup table to prevent duplicates
-                //creates wrap.wrap.wrap bar
-                //ignore files with "wrap." prefix
-                //DEPENDS ON ASSUMPTIONS !!!!!
-
-                close(inputFD, outputFD);
-                close(outputFD);
-                free(newFilePath);
-                free(currentPath)
-
-                /*
-                if(inputFD == -1)
-                {
-                    perror("Cannot Create File.")
-                    //return EXIT_FAILURE;
-                }
-                */
-            }
-
-            
-            
-        }
-        closedir(dirp);
-    }
-    else
-    {
-        inputFD = open(argv[2], O_RDONLY);
-        if(inputFD == -1)   
-        {
-            perror("Invalid Input File Given.");
-            return EXIT_FAILURE;
-        }
-    }
-
-
-    
-
-    int outputFD = 1;
-
-    // algorithm (width, inputfile fd, outputfile fd)
-    EXIT_STATUS = algoTEST(width, inputFD, outputFD);
-
-    close(inputFD);
-    close(outputFD);
-
-    return EXIT_STATUS;
-}
-
-/*
+/* If there are multiple \n, consume only 2. this\n     \n\n\n\n\n    \nasoemth
     @var width - argv[1]
     @var inputFD - fileDescriptor of file to read from
     @var outputFD - fileDescriptor of file to write to
@@ -186,7 +156,7 @@ int main(int argc, char **argv)
     That is a task in main method. This is a silo-d algorithm
     which does the word wrapping job.
 */
-int algoTEST(int width, int inputFD, int outputFD){
+int algo(int width, int inputFD, int outputFD){
     int EXIT_STATUS = EXIT_SUCCESS;
 
     strbuf_t sb; 
