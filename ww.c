@@ -20,7 +20,6 @@ char* generateFilePath(char*, char*, int);
 int prefixContains(char*, char*);
 int algo(int, int, int);
 
-
 /*
     parts missing:
         error checks on program call input
@@ -36,13 +35,20 @@ int main(int argc, char **argv)
     
     for(int i=0; i<strlen(argv[1]); i++){
         if(!isdigit(argv[1][i])){
-            perror("Width not a positive integer");
+            //perror("Dummy");
             EXIT_STATUS = EXIT_FAILURE;
             return EXIT_STATUS;
         }
     }
-    int width = atoi(argv[1]); // argv[1] was all digits
 
+    int width = atoi(argv[1]); // argv[1] was all digits
+    
+    if(width<=0)
+    {
+        EXIT_STATUS = EXIT_FAILURE;
+        return EXIT_STATUS;
+    }
+    
     // yet to do - permissions
     if(argc == 2){
         // only stdin to stdout stuff
@@ -56,7 +62,7 @@ int main(int argc, char **argv)
         // now just bring it back 
         inputFD = open("stdoutStorage.txt", O_RDONLY);
         if(inputFD==-1){
-            perror("This should never happen");
+            perror("");
         }
         char buffer[1024]; int bytes;
         while ((bytes = read(inputFD, buffer, BUFSIZE)) > 0)
@@ -73,7 +79,7 @@ int main(int argc, char **argv)
         int structSTAT = stat(argv[2], &data);
 
         if(structSTAT == -1){
-            perror("argv[2]");
+            perror("");
             EXIT_STATUS = EXIT_FAILURE;
             return EXIT_STATUS;   
         }
@@ -82,8 +88,11 @@ int main(int argc, char **argv)
             //directory logic
             DIR* dirp = opendir(argv[2]);
             if(dirp == NULL){
-                perror("Directory");
+                perror("Folder");
+                EXIT_STATUS = EXIT_FAILURE;
+                return EXIT_STATUS;   
             }
+            
             struct dirent* de = readdir(dirp);
 
             while(!de)
@@ -103,7 +112,7 @@ int main(int argc, char **argv)
                     int inputFD = open(currentPath, O_RDONLY);
                     if(inputFD == -1)   
                     {
-                        perror("Line 86");
+                        perror("");
                         //close(inputFD);
                         free(newFilePath);
                         free(currentPath);
@@ -134,13 +143,18 @@ int main(int argc, char **argv)
             int outputFD = STDOUT_FILENO;
             if(inputFD == -1)   
             {
-                perror("Line 117");
+                perror("File");
                 return EXIT_FAILURE;
             }
 
             EXIT_STATUS = algo(width, inputFD, outputFD);
             close(inputFD);
             close(outputFD);
+        }
+        else
+        {
+            EXIT_STATUS = EXIT_FAILURE;
+            return EXIT_STATUS;   
         }
     }
 
