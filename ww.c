@@ -48,8 +48,23 @@ int main(int argc, char **argv)
         // only stdin to stdout stuff
         // don't have to worry about permissions
         int inputFD = STDIN_FILENO;
-        int outputFD = STDOUT_FILENO;
+        int outputFD = open("stdoutStorage.txt", O_WRONLY | O_TRUNC | O_CREAT, 00777);
         EXIT_STATUS = algo(width, inputFD, outputFD);
+        close(inputFD);
+        close(outputFD);
+        // wrote the stdOut stuff over to stdOutStorage.txt
+        // now just bring it back 
+        inputFD = open("stdoutStorage.txt", O_RDONLY);
+        if(inputFD==-1){
+            perror("This should never happen");
+        }
+        char buffer[1024]; int bytes;
+        while ((bytes = read(inputFD, buffer, BUFSIZE)) > 0)
+            write(STDOUT_FILENO, buffer, bytes);
+
+        close(inputFD);
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
         return EXIT_STATUS;
     }
     else if(argc == 3){
@@ -95,7 +110,7 @@ int main(int argc, char **argv)
                         continue;
                     }
 
-                    int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                    int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 00777); 
 
                     int exit_temp = algo(width, inputFD, outputFD);
 
@@ -270,15 +285,3 @@ int algo(int width, int inputFD, int outputFD){
 }
 
 
-
-/*
-    Yet to do;
-
-    STDIN: streams and stuff.
-
-    automated make file tests, cmp <- directory
-    -, make test cases
-
-    Case 2: in = file, out = stdout
-    ./ww 80 file.txt | cmp solutionForFile.txt
-*/
