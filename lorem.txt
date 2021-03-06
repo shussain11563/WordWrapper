@@ -1,15 +1,31 @@
 The tragedy of the commons is a situation where there is overconsumption of a particular product/service because rational individual decisions lead to an outcome that is damaging to the overall social welfare.
 
-The tragedy of the commons theory assumes that when making decisions, people take the course of action that maximises their own utility. However, if many people seek to do this, the net effect may be to deplete a resource making everyone worse off in the long run.
+The tragedy of the commons theory assumes that when making decisions, people take the course of action that maximises their own utility.  
+    
+     
+          
+         
+         
+         
+          
+          However, if many people seek to do this, the net effect may be to deplete   a resource making everyone worse off in the long run.
 
 The tragedy of the commons was first mentioned by the Victorian economist William Forster Lloyd, in 1833. He used a hypothetical area of common grazing land, in which villagers all took their cows to this common grazing land, but this led to overgrazing and a loss of the resource.
 
-In theory, individuals could limit their use so that they don’t deplete the common resource. However, there is a free-rider problem. Where people rely on others to cut back their production. If everyone free-rides and maximises their use, then we get a situation of over-consumption.
+In theory, individuals could limit their use so that they don’t deplete the common resource.                             However, there is a free-rider problem. Where people rely on     others to cut back their production. If everyone free-rides and maximises their use, then we get a situation of over-consumption.
 
-Individual fisherman have an incentive to catch as many fish as possible. However, if many fishermen have this same motive, then it can lead to fish stocks being depleted as fish are caught at a faster rate than they are replenished.
+            Individual fisherman have an incentive to catch as many fish as possible. 
+            
+            
+            
+            
+            
+            
+            
+                 However, if many fishermen have this same motive, then it can lead to fish stocks being         depleted as fish are caught at a faster rate than they are replenished.
 
 Unchecked, this can lead to a collapse in fish stocks due to over-fishing.
 
-If one individual fisherman holds back on his catch to try and preserve overall fish stocks, it may prove futile because many other fishermen continue to catch as much as possible!
+If one individual fisherman holds back on his catch to try and preserve overall fish stocks,                              it may prove futile because many other fishermen continue to catch as much as possible!                                                 
 This is a good example file 
      That    is 		very

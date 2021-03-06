@@ -189,7 +189,7 @@ int algo(int width, int inputFD, int outputFD){
     const char whitespace[1] = {' '};
     
     char buffer[BUFSIZE]; 
-    int count = 0, newlineDetectedOnce = 0;
+    int count = 0, newlineDetectedOnce = 0, two_newlineDetected = 0;
 
     // Here to visualize width and compare output.
     const char dash[1] = {'-'};
@@ -204,10 +204,10 @@ int algo(int width, int inputFD, int outputFD){
             if(sb.used > width){ EXIT_STATUS = EXIT_FAILURE;}
             if(count >= width){write(outputFD, newline, 1); count = 0;}
 
-            if(c == '\n'){
+            if(c == '\n'){ /* One newline found*/
                 if(!newlineDetectedOnce){
                     newlineDetectedOnce = 1;
-                    if(sb.used != 0){
+                    if(sb.used != 0){ /* This is here to prevent isSpace from writing */
                         if(sb.used < (width-count)){
                             if(count != 0){
                                 write(outputFD, whitespace, 1);
@@ -224,18 +224,11 @@ int algo(int width, int inputFD, int outputFD){
                         }
                     }
                 }
-                else{
-                    /* Two consecutive newlines found*/
-                    write(outputFD, newline, 1);
-                    write(outputFD, newline, 1);
-                    count = 0;
+                else{ /* Two consecutive newlines found*/
+                    two_newlineDetected = 1;
                 }
             }
             else if(isspace(c) && sb.used!=0){
-                if(newlineDetectedOnce){ // If only one line separator, reset it.
-                    newlineDetectedOnce = 0;
-                }
-
                 if(sb.used < (width-count)){
                     if(count != 0){
                         write(outputFD, whitespace, 1);
@@ -252,10 +245,15 @@ int algo(int width, int inputFD, int outputFD){
                 }
             }
             else if(!isspace(c)){
-                sb_append(&sb, c);
-                if(newlineDetectedOnce){
-                    newlineDetectedOnce = 0;
+                if(two_newlineDetected){
+                    write(outputFD, newline, 1);
+                    write(outputFD, newline, 1);
+                    count = 0;
                 }
+
+                sb_append(&sb, c);
+                two_newlineDetected = 0;
+                newlineDetectedOnce = 0;
             }
         }
 
