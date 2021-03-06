@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include "strbuf.h"
 #include <sys/stat.h> //can just write stat.h, cause fctnl.h is also in sys
@@ -52,24 +53,26 @@ int main(int argc, char **argv)
         return EXIT_STATUS;
     }
     else if(argc == 3){
-        int isDir = 0;
+
         struct stat data;
-        int fileMode = stat(argv[2], &data);
+        stat(argv[2], &data);
 
         if(S_ISDIR(data.st_mode)) // argv2 is a directory
         {
             //directory logic
             DIR* dirp = opendir(argv[2]);
-            struct dirent* de;
+            struct dirent* de = readdir(dirp);
 
-            while(de = readdir(dirp))
+            while(!de)
             {
                 
-                if(prefixContains("wrap.", de->d_name))
+                if(prefixContains("wrap.", de->d_name) || strcmp(de->d_name,".")==0 || strcmp(de->d_name,"..")==0)
                 {
                     continue;
                 }
-                if(strcmp(de->d_name,".")!=0 && strcmp(de->d_name,"..")!=0 && DT_REG==de->d_type)
+
+                stat(de->d_name, &data);
+                if(S_ISREG(data.st_mode))
                 { // DT_REG - type of regular files
 
                     char* newFilePath = generateFilePath(argv[2], de->d_name);
@@ -82,7 +85,7 @@ int main(int argc, char **argv)
                         return EXIT_FAILURE; //<--------------remove this????
                     }
 
-                    int outputFD = open(generateFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                    int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
 
                     int exit_temp = algo(width, inputFD, outputFD);
 
@@ -95,6 +98,8 @@ int main(int argc, char **argv)
                     free(newFilePath);
                     free(currentPath);
                 }
+
+                de = readdir(dirp);
             } 
             closedir(dirp);
         }
