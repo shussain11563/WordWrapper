@@ -16,8 +16,7 @@
 #define BUFSIZE 256
 #endif
 
-char* generateFilePath(char*, char*);
-char* generateCurrentPath(char*, char*);
+char* generateFilePath(char*, char*, int);
 int prefixContains(char*, char*);
 int algo(int, int, int);
 
@@ -56,9 +55,14 @@ int main(int argc, char **argv)
     else if(argc == 3){
 
         struct stat data;
-        stat(argv[2], &data);
+        int structSTAT = stat(argv[2], &data);
 
-        if(S_ISDIR(data.st_mode)) // argv2 is a directory, we are guaranteed it exists now so opendir won't return NULL
+        if(structSTAT == -1){
+            perror("argv[2]");
+            EXIT_STATUS = EXIT_FAILURE;
+            return EXIT_STATUS;   
+        }
+        else if(S_ISDIR(data.st_mode)) // argv2 is a directory, we are guaranteed it exists now so opendir won't return NULL
         {
             //directory logic
             DIR* dirp = opendir(argv[2]);
@@ -78,13 +82,13 @@ int main(int argc, char **argv)
                 if(S_ISREG(data.st_mode))
                 { // DT_REG - type of regular files
 
-                    char* currentPath = generateCurrentPath(argv[2], de->d_name); // <dir_name/<file_name>
-                    char* newFilePath = generateFilePath(argv[2], de->d_name); // <dir_name>/wrap.<file_name>
+                    char* currentPath = generateFilePath(argv[2], de->d_name, 1); // <dir_name/<file_name>
+                    char* newFilePath = generateFilePath(argv[2], de->d_name, 0); // <dir_name>/wrap.<file_name>
 
                     int inputFD = open(currentPath, O_RDONLY);
                     if(inputFD == -1)   
                     {
-                        perror("Open line 84");
+                        perror("Line 86");
                         //close(inputFD);
                         free(newFilePath);
                         free(currentPath);
@@ -115,7 +119,7 @@ int main(int argc, char **argv)
             int outputFD = STDOUT_FILENO;
             if(inputFD == -1)   
             {
-                perror("Open line 112");
+                perror("Line 117");
                 return EXIT_FAILURE;
             }
 
@@ -123,39 +127,22 @@ int main(int argc, char **argv)
             close(inputFD);
             close(outputFD);
         }
-        else // else neither a file or a dir
-        { 
-            perror("argv[2] neither a file nor dir");
-            EXIT_STATUS = EXIT_FAILURE;
-            return EXIT_STATUS;   
-        }
     }
 
     return EXIT_STATUS;
 }
 
 // wrap.file in that directory for that specific file
-char* generateFilePath(char* directoryName, char* filePath)
+char* generateFilePath(char* directoryName, char* filePath, int isCurrPath)
 {
     strbuf_t path;
     sb_init(&path, 10);
     sb_concat(&path, directoryName);
     sb_append(&path, '/');
-    sb_concat(&path, "wrap.");
-    sb_concat(&path, filePath);
-    char* ret = malloc(sizeof(char)*path.length);
-    strcpy(ret, path.data);
-    sb_destroy(&path);
-    return ret;
-}
-//add third argument regarding whether to add "wrap." and delete duplicate
-char* generateCurrentPath(char* directoryName, char* filePath)
-{
-    strbuf_t path;
-    sb_init(&path, 10);
-    sb_concat(&path, directoryName);
-    sb_append(&path, '/');
-    //sb_concat(&path, "wrap.");
+    if(!isCurrPath)
+    {
+        sb_concat(&path, "wrap.");
+    }
     sb_concat(&path, filePath);
     char* ret = malloc(sizeof(char)*path.length);
     strcpy(ret, path.data);
@@ -281,3 +268,17 @@ int algo(int width, int inputFD, int outputFD){
 
     return EXIT_STATUS;
 }
+
+
+
+/*
+    Yet to do;
+
+    STDIN: streams and stuff.
+
+    automated make file tests, cmp <- directory
+    -, make test cases
+
+    Case 2: in = file, out = stdout
+    ./ww 80 file.txt | cmp solutionForFile.txt
+*/
