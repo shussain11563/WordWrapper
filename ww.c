@@ -75,8 +75,8 @@ int main(int argc, char **argv)
                 if(S_ISREG(data.st_mode))
                 { // DT_REG - type of regular files
 
-                    char* currentPath = generateCurrentPath(argv[2], de->d_name); // <dir_name/<file_name>
-                    char* newFilePath = generateFilePath(argv[2], de->d_name); // <dir_name>/wrap.<file_name>
+                    char* currentPath = generateFilePath(argv[2], de->d_name, 1); // <dir_name/<file_name>
+                    char* newFilePath = generateFilePath(argv[2], de->d_name, 0); // <dir_name>/wrap.<file_name>
 
                     int inputFD = open(currentPath, O_RDONLY);
                     if(inputFD == -1)   
@@ -132,27 +132,16 @@ int main(int argc, char **argv)
 }
 
 // wrap.file in that directory for that specific file
-char* generateFilePath(char* directoryName, char* filePath)
+char* generateFilePath(char* directoryName, char* filePath, int isCurrPath)
 {
     strbuf_t path;
     sb_init(&path, 10);
     sb_concat(&path, directoryName);
     sb_append(&path, '/');
-    sb_concat(&path, "wrap.");
-    sb_concat(&path, filePath);
-    char* ret = malloc(sizeof(char)*path.length);
-    strcpy(ret, path.data);
-    sb_destroy(&path);
-    return ret;
-}
-//add third argument regarding whether to add "wrap." and delete duplicate
-char* generateCurrentPath(char* directoryName, char* filePath)
-{
-    strbuf_t path;
-    sb_init(&path, 10);
-    sb_concat(&path, directoryName);
-    sb_append(&path, '/');
-    //sb_concat(&path, "wrap.");
+    if(!isCurrPath)
+    {
+        sb_concat(&path, "wrap.");
+    }
     sb_concat(&path, filePath);
     char* ret = malloc(sizeof(char)*path.length);
     strcpy(ret, path.data);
