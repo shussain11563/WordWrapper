@@ -31,21 +31,25 @@ int algo(int, int, int);
 int main(int argc, char **argv)
 {
 
-    // argc = 2 or argc = 3
+    int EXIT_STATUS = EXIT_SUCCESS;
     
-    
-    int EXIT_STATUS;
-    
-
-    /* CHECK THIS THING */
-    int width = atoi(argv[1]);
-
-    int inputFD;
+    for(int i=0; i<strlen(argv[1]); i++){
+        if(!isdigit(argv[1][i])){
+            perror("Width not a positive integer");
+            EXIT_STATUS = EXIT_FAILURE;
+            return EXIT_STATUS;
+        }
+    }
+    int width = atoi(argv[1]); // argv[1] was all digits
 
     // yet to do - permissions
     if(argc == 2){
         // only stdin to stdout stuff
         // don't have to worry about permissions
+        int inputFD = STDIN_FILENO;
+        int outputFD = STDOUT_FILENO;
+        EXIT_STATUS = algo(width, inputFD, outputFD);
+        return EXIT_STATUS;
     }
     else if(argc == 3){
         int isDir = 0;
@@ -79,7 +83,12 @@ int main(int argc, char **argv)
                     }
 
                     int outputFD = open(generateFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
-                    EXIT_STATUS = algo(width, inputFD, outputFD);
+
+                    int exit_temp = algo(width, inputFD, outputFD);
+
+                    if(exit_temp == EXIT_FAILURE){
+                        EXIT_STATUS = EXIT_FAILURE;
+                    }
 
                     close(inputFD);
                     close(outputFD);
@@ -91,22 +100,23 @@ int main(int argc, char **argv)
         }
         else if(S_ISREG(data.st_mode)) // argv2 is a file
         {
-            inputFD = open(argv[2], O_RDONLY);
+            int inputFD = open(argv[2], O_RDONLY);
+            int outputFD = STDOUT_FILENO;
             if(inputFD == -1)   
             {
                 perror("Invalid Input File Given.");
                 return EXIT_FAILURE;
             }
 
-            EXIT_STATUS = algo(width, inputFD, STDOUT_FILENO);
+            EXIT_STATUS = algo(width, inputFD, outputFD);
             close(inputFD);
-            close(STDOUT_FILENO);
+            close(outputFD);
         }
-        else
-        {
-            // else neither a file or a dir
+        else // else neither a file or a dir
+        { 
             perror("argv[2] neither a file nor dir");
-            return EXIT_FAILURE;   
+            EXIT_STATUS = EXIT_FAILURE;
+            return EXIT_STATUS;   
         }
     }
 

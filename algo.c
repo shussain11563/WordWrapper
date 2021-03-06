@@ -36,14 +36,8 @@ int main(int argc, char **argv)
     int width = atoi(argv[1]);
 
     int inputFD= open(argv[2], O_RDONLY);
-    if(inputFD == -1){
-        perror("Invalid Input File Given.");
-        return EXIT_FAILURE;
-    }
-
     int outputFD = 1;
-
-    // algorithm (width, inputfile fd, outputfile fd)
+    
     EXIT_STATUS = algo(width, inputFD, outputFD);
 
     close(inputFD);
@@ -52,8 +46,7 @@ int main(int argc, char **argv)
     return EXIT_STATUS;
 }
 
-
-/*
+/* If there are multiple \n, consume only 2. this\n     \n\n\n\n\n    \nasoemth
     @var width - argv[1]
     @var inputFD - fileDescriptor of file to read from
     @var outputFD - fileDescriptor of file to write to
@@ -83,89 +76,55 @@ int algo(int width, int inputFD, int outputFD){
     while (bytes > 0) {
         for(int i=0; i<bytes; i++){
             char c = buffer[i];
-            // Word longer than column width? 
+            /* Word longer than column width? */
             if(sb.used > width){ EXIT_STATUS = EXIT_FAILURE;}
             if(count >= width){write(outputFD, newline, 1); count = 0;}
 
             if(c == '\n'){
                 if(!newlineDetectedOnce){
                     newlineDetectedOnce = 1;
-
-                    if(sb.used <= (width-count)){
-                        write(outputFD, sb.data, sb.used);
-                        count += sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
+                    if(sb.used != 0){
+                        if(sb.used < (width-count)){
+                            if(count != 0){
+                                write(outputFD, whitespace, 1);
+                            }
+                            write(outputFD, sb.data, sb.used);
+                            count += sb.used+1;
+                            sb_reset(&sb);
                         }
-                        sb_reset(&sb);
-                    }
-                    else{
-                        write(outputFD, newline, 1);
-                        write(outputFD, sb.data, sb.used);
-                        count = sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
+                        else{
+                            write(outputFD, newline, 1);
+                            write(outputFD, sb.data, sb.used);
+                            count = sb.used;
+                            sb_reset(&sb);
                         }
-                        sb_reset(&sb);
                     }
                 }
                 else{
-                    // Two consecutive newlines found
-                    if(sb.used <= (width-count)){
-                        write(outputFD, sb.data, sb.used);
-                        count += sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
-                        }
-                        sb_reset(&sb);                          
-                    }
-                    else{
-                        write(outputFD, newline, 1);
-                        write(outputFD, sb.data, sb.used);
-                        count = sb.used;
-                        if(count != width && sb.used != 0){
-                            write(outputFD, whitespace, 1);
-                            ++count;
-                        }
-                        sb_reset(&sb);
-                        
-                        if(count >= width){
-                            write(outputFD, newline, 1);
-                            count = 0;
-                        }
-                    }
+                    /* Two consecutive newlines found*/
                     write(outputFD, newline, 1);
                     write(outputFD, newline, 1);
                     count = 0;
-                    newlineDetectedOnce = 0;
                 }
             }
             else if(isspace(c) && sb.used!=0){
-                if(newlineDetectedOnce){
+                if(newlineDetectedOnce){ // If only one line separator, reset it.
                     newlineDetectedOnce = 0;
                 }
 
-                if(sb.used <= (width-count)){
-                    write(outputFD, sb.data, sb.used);
-                    count += sb.used;
-                    sb_reset(&sb);
-                    if(count != width){
+                if(sb.used < (width-count)){
+                    if(count != 0){
                         write(outputFD, whitespace, 1);
-                        ++count;
                     }
+                    write(outputFD, sb.data, sb.used);
+                    count += sb.used+1;
+                    sb_reset(&sb);
                 }
                 else{
                     write(outputFD, newline, 1);
                     write(outputFD, sb.data, sb.used);
                     count = sb.used;
                     sb_reset(&sb);
-                    if(count != width){
-                        write(outputFD, whitespace, 1);
-                        ++count;
-                    }
                 }
             }
             else if(!isspace(c)){
@@ -181,15 +140,21 @@ int algo(int width, int inputFD, int outputFD){
 
     // Having parsed last buffer, handle anything left in sb.
     if(sb.used != 0){
-        if(sb.used > (width-count)){
-            write(outputFD, newline, 1);
+       if(sb.used < (width-count)){
+            if(count != 0){
+                write(outputFD, whitespace, 1);
+            }
+            write(outputFD, sb.data, sb.used);
+            sb_reset(&sb);
         }
-
-        write(outputFD, sb.data, sb.used);
-        sb_reset(&sb);
+        else{
+            write(outputFD, newline, 1);
+            write(outputFD, sb.data, sb.used);
+            sb_reset(&sb);
+        }
     }
 
-    write(outputFD, newline, 1);
+    write(outputFD, newline, 1); //<-----
     sb_destroy(&sb); // clear space allocated for string.
 
     return EXIT_STATUS;
