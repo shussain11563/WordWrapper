@@ -6,11 +6,8 @@
 #include <ctype.h>
 #include <errno.h>
 #include "strbuf.h"
-#include <sys/stat.h> //can just write stat.h, cause fctnl.h is also in sys
+#include <sys/stat.h> 
 #include <dirent.h>
-/*#include "isNumber.h" */
-//code to check whether the width is an integer // will test to make sure
-//we have duplicate header files in strbuf.h and isNumber.h
 
 #ifndef BUFSIZE
 #define BUFSIZE 256
@@ -20,14 +17,6 @@ char* generateFilePath(char*, char*, int);
 int prefixContains(char*, char*);
 int algo(int, int, int);
 
-/*
-    parts missing:
-        error checks on program call input
-        determining what the input file and output file is
-        if directory -> a loop to complete the step for all files.
-            -> will need O_CREATE flag to make the outputfile.wrap files.
-
-*/
 int main(int argc, char **argv)
 {
 
@@ -35,7 +24,6 @@ int main(int argc, char **argv)
     
     for(int i=0; i<strlen(argv[1]); i++){
         if(!isdigit(argv[1][i])){
-            //perror("Dummy");
             EXIT_STATUS = EXIT_FAILURE;
             return EXIT_STATUS;
         }
@@ -49,7 +37,6 @@ int main(int argc, char **argv)
         return EXIT_STATUS;
     }
     
-    // yet to do - permissions
     if(argc == 2){
         // only stdin to stdout stuff
         // don't have to worry about permissions
@@ -150,11 +137,6 @@ int main(int argc, char **argv)
             EXIT_STATUS = algo(width, inputFD, outputFD);
             close(inputFD);
             close(outputFD);
-        }
-        else
-        {
-            EXIT_STATUS = EXIT_FAILURE;
-            return EXIT_STATUS;   
         }
     }
 
