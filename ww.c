@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include "strbuf.h"
 #include <sys/stat.h> //can just write stat.h, cause fctnl.h is also in sys
 #include <dirent.h>
@@ -57,7 +58,7 @@ int main(int argc, char **argv)
         struct stat data;
         stat(argv[2], &data);
 
-        if(S_ISDIR(data.st_mode)) // argv2 is a directory
+        if(S_ISDIR(data.st_mode)) // argv2 is a directory, we are guaranteed it exists now so opendir won't return NULL
         {
             //directory logic
             DIR* dirp = opendir(argv[2]);
@@ -65,7 +66,6 @@ int main(int argc, char **argv)
 
             while(!de)
             {
-                
                 if(prefixContains("wrap.", de->d_name) || strcmp(de->d_name,".")==0 || strcmp(de->d_name,"..")==0)
                 {
                     continue;
@@ -75,14 +75,17 @@ int main(int argc, char **argv)
                 if(S_ISREG(data.st_mode))
                 { // DT_REG - type of regular files
 
-                    char* newFilePath = generateFilePath(argv[2], de->d_name);
-                    char* currentPath = generateCurrentPath(argv[2], de->d_name);
-                    
+                    char* currentPath = generateCurrentPath(argv[2], de->d_name); // <dir_name/<file_name>
+                    char* newFilePath = generateFilePath(argv[2], de->d_name); // <dir_name>/wrap.<file_name>
+
                     int inputFD = open(currentPath, O_RDONLY);
                     if(inputFD == -1)   
                     {
-                        perror("Invalid Input File Given.");
-                        return EXIT_FAILURE; //<--------------remove this????
+                        perror("Open line 84");
+                        //close(inputFD);
+                        free(newFilePath);
+                        free(currentPath);
+                        continue;
                     }
 
                     int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
@@ -109,7 +112,7 @@ int main(int argc, char **argv)
             int outputFD = STDOUT_FILENO;
             if(inputFD == -1)   
             {
-                perror("Invalid Input File Given.");
+                perror("Open line 112");
                 return EXIT_FAILURE;
             }
 
