@@ -62,6 +62,9 @@ int main(int argc, char **argv)
         {
             //directory logic
             DIR* dirp = opendir(argv[2]);
+            if(dirp == NULL){
+                perror("Directory");
+            }
             struct dirent* de = readdir(dirp);
 
             while(!de)
