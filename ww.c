@@ -21,19 +21,35 @@ int algo(int, int, int);
 int main(int argc, char **argv)
 {
     /* Ensure proper number of parameters */
-    if(argc > 3 || argc < 2){
+    if(argc > 3 || argc < 2)
+    {
+        //errno = E2BIG; for large arguments
+        errno = EPERM;
+        perror("Arguments too small or too large");
         return EXIT_FAILURE;
+
     }
 
     int EXIT_STATUS = EXIT_SUCCESS;
     
     /* Ensure proper width parameter */
-    for(int i=0; i<strlen(argv[1]); i++) 
-        if(!isdigit(argv[1][i])) 
-            return EXIT_STATUS; 
+    for(int i=0; i<strlen(argv[1]); i++)
+    {
+        if(!isdigit(argv[1][i]))
+        {
+            errno = EINVAL;
+            perror("Not a valid width");
+            return EXIT_FAILURE; 
+        }
+    }
 
     int width = atoi(argv[1]); // argv[1] was all digits
-    if(width<=0) return EXIT_FAILURE;
+    if(width<=0)
+    {
+        errno = EINVAL;
+        perror("Not a valid width");
+        return EXIT_FAILURE;
+    }
     /* Ensured proper width parameter */
 
     if(argc == 2){
@@ -72,7 +88,6 @@ int main(int argc, char **argv)
 
             DIR* dirp = opendir(argv[2]);
             if(dirp == NULL){
-                closedir(dirp);
                 perror("Folder");
                 return EXIT_FAILURE;
             }
@@ -85,7 +100,6 @@ int main(int argc, char **argv)
             {
                 char* currentPath = generateFilePath(argv[2], entry->d_name, 1); // <dir_name/<file_name>
                 char* newFilePath = generateFilePath(argv[2], entry->d_name, 0); // <dir_name>/wrap.<file_name>
-
                 /* use stat on entry->d_name to give info on that file */
                 /* but entry->d_name is not appropraite, we must give a path */
                 statRETURN = stat(currentPath, &entryStat); 
@@ -133,10 +147,6 @@ int main(int argc, char **argv)
             } 
             closedir(dirp);
 
-            if(errno!=0){
-                perror("137");
-                return EXIT_FAILURE;
-            }
         }
 
         else if(S_ISREG(data.st_mode)) // argv2 is a file
@@ -198,11 +208,6 @@ int algo(int width, int inputFD, int outputFD){
     
     char buffer[BUFSIZE]; 
     int count = 0, newlineDetectedOnce = 0, two_newlineDetected = 0;
-
-    // Here to visualize width and compare output.
-    const char dash[1] = {'-'};
-    for(int w=0; w<width; w++) write(outputFD, dash, 1);
-    write(outputFD, newline, 1);
 
     int bytes = read(inputFD, buffer, BUFSIZE);
     int somethingWritten = 0;
