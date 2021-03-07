@@ -317,7 +317,9 @@ int algo(int width, int inputFD, int outputFD){
         somethingWritten = 1;
     }
 
-    write(outputFD, newline, 1);
+    if(somethingWritten){
+        write(outputFD, newline, 1);
+    }
     sb_destroy(&sb); // clear space allocated for string.
 
     return EXIT_STATUS;
