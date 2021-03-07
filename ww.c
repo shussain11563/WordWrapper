@@ -198,11 +198,6 @@ int algo(int width, int inputFD, int outputFD){
     char buffer[BUFSIZE]; 
     int count = 0, newlineDetectedOnce = 0, two_newlineDetected = 0;
 
-    // Here to visualize width and compare output.
-    const char dash[1] = {'-'};
-    for(int w=0; w<width; w++) write(outputFD, dash, 1);
-    write(outputFD, newline, 1);
-
     int bytes = read(inputFD, buffer, BUFSIZE);
     int somethingWritten = 0;
     while (bytes > 0) {
