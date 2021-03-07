@@ -19,24 +19,22 @@ int algo(int, int, int);
 
 int main(int argc, char **argv)
 {
+    /* Ensure proper number of parameters */
+    if(argc > 3 || argc < 2){
+        return EXIT_FAILURE;
+    }
 
     int EXIT_STATUS = EXIT_SUCCESS;
     
-    for(int i=0; i<strlen(argv[1]); i++){
-        if(!isdigit(argv[1][i])){
-            EXIT_STATUS = EXIT_FAILURE;
-            return EXIT_STATUS;
-        }
-    }
+    /* Ensure proper width parameter */
+    for(int i=0; i<strlen(argv[1]); i++) 
+        if(!isdigit(argv[1][i])) 
+            return EXIT_STATUS; 
 
     int width = atoi(argv[1]); // argv[1] was all digits
-    
-    if(width<=0)
-    {
-        EXIT_STATUS = EXIT_FAILURE;
-        return EXIT_STATUS;
-    }
-    
+    if(width<=0) return EXIT_STATUS;
+    /* Ensured proper width parameter */
+
     if(argc == 2){
         // only stdin to stdout stuff
         // don't have to worry about permissions
@@ -70,7 +68,8 @@ int main(int argc, char **argv)
             EXIT_STATUS = EXIT_FAILURE;
             return EXIT_STATUS;   
         }
-        else if(S_ISDIR(data.st_mode)) // argv2 is a directory, we are guaranteed it exists now so opendir won't return NULL
+        
+        if(S_ISDIR(data.st_mode)) // argv2 is a directory, we are guaranteed it exists now so opendir won't return NULL
         {
             //directory logic
             DIR* dirp = opendir(argv[2]);
@@ -80,52 +79,56 @@ int main(int argc, char **argv)
                 return EXIT_STATUS;   
             }
             
-            struct dirent* de = readdir(dirp);
+            errno = 0;
+            struct dirent* de;
 
-            while(de != NULL)
+            while((de = readdir(dirp)) != NULL)
             {
-                if(prefixContains("wrap.", de->d_name) || strcmp(de->d_name,".")==0 || strcmp(de->d_name,"..")==0)
-                {
-                    de = readdir(dirp);
+                stat(de->d_name, &data);
+                puts(de->d_name);
+                printf("%d \n", data.st_mode);
+                if(prefixContains("wrap.", de->d_name) || !(S_ISREG(data.st_mode))){
                     continue;
                 }
 
-                stat(de->d_name, &data);
-                if(S_ISREG(data.st_mode))
-                { // DT_REG - type of regular files
+                // Otherwise it is a regular file.
+                char* currentPath = generateFilePath(argv[2], de->d_name, 1); // <dir_name/<file_name>
+                char* newFilePath = generateFilePath(argv[2], de->d_name, 0); // <dir_name>/wrap.<file_name>
 
-                    char* currentPath = generateFilePath(argv[2], de->d_name, 1); // <dir_name/<file_name>
-                    char* newFilePath = generateFilePath(argv[2], de->d_name, 0); // <dir_name>/wrap.<file_name>
-                    puts(newFilePath);
-                    puts(currentPath);
-
-                    int inputFD = open(currentPath, O_RDONLY);
-                    if(inputFD == -1)   
-                    {
-                        perror("");
-                        //close(inputFD);
-                        free(newFilePath);
-                        free(currentPath);
-                        continue;
-                    }
-
-                    int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
-
-                    int exit_temp = algo(width, inputFD, outputFD);
-
-                    if(exit_temp == EXIT_FAILURE){
-                        EXIT_STATUS = EXIT_FAILURE;
-                    }
-
-                    close(inputFD);
-                    close(outputFD);
+                int inputFD = open(currentPath, O_RDONLY);
+                if(inputFD == -1)   
+                {
+                    perror("Input");
                     free(newFilePath);
                     free(currentPath);
+                    continue;
                 }
 
-                de = readdir(dirp);
+                int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
+                if(outputFD == -1)   
+                {
+                    perror("Output");
+                    free(newFilePath);
+                    free(currentPath);
+                    continue;
+                }
+
+                int exit_temp = algo(width, inputFD, outputFD);
+
+                if(exit_temp == EXIT_FAILURE){
+                    EXIT_STATUS = EXIT_FAILURE;
+                }
+
+                close(inputFD);
+                close(outputFD);
+                free(newFilePath);
+                free(currentPath);
             } 
             closedir(dirp);
+
+            if(errno!=0){
+                perror("131");
+            }
         }
         else if(S_ISREG(data.st_mode)) // argv2 is a file
         {
@@ -169,8 +172,7 @@ int prefixContains(char* prefix, char* word)
     return strncmp(prefix, word, strlen(prefix)) == 0;
 }
 
-/* If there are multiple \n, consume only 2. this\n     \n\n\n\n\n    \nasoemth
-    @var width - argv[1]
+/*  @var width - argv[1]
     @var inputFD - fileDescriptor of file to read from
     @var outputFD - fileDescriptor of file to write to
 
