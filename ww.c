@@ -84,7 +84,6 @@ int main(int argc, char **argv)
 
             while(de != NULL)
             {
-                printf("Something bullshti");
                 if(prefixContains("wrap.", de->d_name) || strcmp(de->d_name,".")==0 || strcmp(de->d_name,"..")==0)
                 {
                     de = readdir(dirp);
@@ -97,6 +96,8 @@ int main(int argc, char **argv)
 
                     char* currentPath = generateFilePath(argv[2], de->d_name, 1); // <dir_name/<file_name>
                     char* newFilePath = generateFilePath(argv[2], de->d_name, 0); // <dir_name>/wrap.<file_name>
+                    puts(newFilePath);
+                    puts(currentPath);
 
                     int inputFD = open(currentPath, O_RDONLY);
                     if(inputFD == -1)   
