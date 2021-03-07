@@ -72,7 +72,6 @@ int main(int argc, char **argv)
 
             DIR* dirp = opendir(argv[2]);
             if(dirp == NULL){
-                closedir(dirp);
                 perror("Folder");
                 return EXIT_FAILURE;
             }
