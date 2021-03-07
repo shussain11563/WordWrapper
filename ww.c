@@ -82,10 +82,12 @@ int main(int argc, char **argv)
             
             struct dirent* de = readdir(dirp);
 
-            while(!de)
+            while(de != NULL)
             {
+                printf("Something bullshti");
                 if(prefixContains("wrap.", de->d_name) || strcmp(de->d_name,".")==0 || strcmp(de->d_name,"..")==0)
                 {
+                    de = readdir(dirp);
                     continue;
                 }
 
@@ -305,5 +307,3 @@ int algo(int width, int inputFD, int outputFD){
 
     return EXIT_STATUS;
 }
-
-
