@@ -7,6 +7,7 @@
 #include <errno.h>
 #include "strbuf.h"
 #include <sys/stat.h> 
+#include <sys/types.h> 
 #include <dirent.h>
 
 #ifndef BUFSIZE
@@ -32,7 +33,7 @@ int main(int argc, char **argv)
             return EXIT_STATUS; 
 
     int width = atoi(argv[1]); // argv[1] was all digits
-    if(width<=0) return EXIT_STATUS;
+    if(width<=0) return EXIT_FAILURE;
     /* Ensured proper width parameter */
 
     if(argc == 2){
@@ -54,82 +55,90 @@ int main(int argc, char **argv)
             write(STDOUT_FILENO, buffer, bytes);
 
         close(inputFD);
-        close(STDIN_FILENO);
         close(STDOUT_FILENO);
         return EXIT_STATUS;
     }
-    else if(argc == 3){
+
+    else{
 
         struct stat data;
-        int structSTAT = stat(argv[2], &data);
+        int statRETURN = stat(argv[2], &data);
 
-        if(structSTAT == -1){
+        if(statRETURN == -1){
             perror("");
-            EXIT_STATUS = EXIT_FAILURE;
-            return EXIT_STATUS;   
+            return EXIT_FAILURE;
         }
-        
-        if(S_ISDIR(data.st_mode)) // argv2 is a directory, we are guaranteed it exists now so opendir won't return NULL
-        {
-            //directory logic
+        else if(S_ISDIR(data.st_mode)){ // argv2 is a directory
+
             DIR* dirp = opendir(argv[2]);
             if(dirp == NULL){
+                closedir(dirp);
                 perror("Folder");
-                EXIT_STATUS = EXIT_FAILURE;
-                return EXIT_STATUS;   
+                return EXIT_FAILURE;
             }
             
             errno = 0;
-            struct dirent* de;
+            struct dirent* entry; // This structure may be statically allocated. Don't attempt to free it. man 3 readdir
+            struct stat entryStat; 
 
-            while((de = readdir(dirp)) != NULL)
+            while((entry = readdir(dirp)) != NULL)
             {
-                stat(de->d_name, &data);
-                puts(de->d_name);
-                printf("%d \n", data.st_mode);
-                if(prefixContains("wrap.", de->d_name) || !(S_ISREG(data.st_mode))){
+                char* currentPath = generateFilePath(argv[2], entry->d_name, 1); // <dir_name/<file_name>
+                char* newFilePath = generateFilePath(argv[2], entry->d_name, 0); // <dir_name>/wrap.<file_name>
+
+                /* use stat on entry->d_name to give info on that file */
+                /* but entry->d_name is not appropraite, we must give a path */
+                statRETURN = stat(currentPath, &entryStat); 
+
+                if(statRETURN == -1){
+                    EXIT_STATUS = EXIT_FAILURE;
+                    free(currentPath);
+                    free(newFilePath);
+                    continue;
+                }
+
+                // Skip wrap.* files and non-regular files (including symbolic links).
+                if((strncmp("wrap.", entry->d_name, strlen("wrap.")) == 0) || !(S_ISREG(entryStat.st_mode))){
+                    free(currentPath);
+                    free(newFilePath);
                     continue;
                 }
 
                 // Otherwise it is a regular file.
-                char* currentPath = generateFilePath(argv[2], de->d_name, 1); // <dir_name/<file_name>
-                char* newFilePath = generateFilePath(argv[2], de->d_name, 0); // <dir_name>/wrap.<file_name>
-
+                
                 int inputFD = open(currentPath, O_RDONLY);
-                if(inputFD == -1)   
-                {
-                    perror("Input");
-                    free(newFilePath);
+                if(inputFD == -1){
                     free(currentPath);
+                    free(newFilePath);
                     continue;
                 }
-
-                int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
-                if(outputFD == -1)   
-                {
-                    perror("Output");
-                    free(newFilePath);
+                int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO); 
+                if(outputFD == -1){
                     free(currentPath);
+                    free(newFilePath);
+                    close(inputFD);
                     continue;
                 }
 
                 int exit_temp = algo(width, inputFD, outputFD);
 
+                free(currentPath);
+                free(newFilePath);
+                close(inputFD);
+                close(outputFD);
+
                 if(exit_temp == EXIT_FAILURE){
                     EXIT_STATUS = EXIT_FAILURE;
                 }
-
-                close(inputFD);
-                close(outputFD);
-                free(newFilePath);
-                free(currentPath);
             } 
             closedir(dirp);
 
             if(errno!=0){
-                perror("131");
+                perror("137");
+                return EXIT_FAILURE;
             }
         }
+
         else if(S_ISREG(data.st_mode)) // argv2 is a file
         {
             int inputFD = open(argv[2], O_RDONLY);
@@ -161,16 +170,14 @@ char* generateFilePath(char* directoryName, char* filePath, int isCurrPath)
         sb_concat(&path, "wrap.");
     }
     sb_concat(&path, filePath);
-    char* ret = malloc(sizeof(char)*path.length);
+
+    char* ret = malloc(sizeof(char)* (path.used+1));
     strcpy(ret, path.data);
+    
     sb_destroy(&path);
     return ret;
 }
 
-int prefixContains(char* prefix, char* word)
-{
-    return strncmp(prefix, word, strlen(prefix)) == 0;
-}
 
 /*  @var width - argv[1]
     @var inputFD - fileDescriptor of file to read from
