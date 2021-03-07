@@ -106,7 +106,7 @@ int main(int argc, char **argv)
                         continue;
                     }
 
-                    int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 00777); 
+                    int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0777); 
 
                     int exit_temp = algo(width, inputFD, outputFD);
 
@@ -193,6 +193,7 @@ int algo(int width, int inputFD, int outputFD){
     write(outputFD, newline, 1);
 
     int bytes = read(inputFD, buffer, BUFSIZE);
+    int somethingWritten = 0;
     while (bytes > 0) {
         for(int i=0; i<bytes; i++){
             char c = buffer[i];
@@ -224,6 +225,7 @@ int algo(int width, int inputFD, int outputFD){
                             count = sb.used;
                             sb_reset(&sb);
                         }
+                        somethingWritten = 1;
                     }
                 }
                 else{ /* Two consecutive newlines found*/
@@ -251,8 +253,13 @@ int algo(int width, int inputFD, int outputFD){
                     count = sb.used;
                     sb_reset(&sb);
                 }
+                somethingWritten = 1;
             }
             else if(!isspace(c)){
+                if(!somethingWritten){
+                    two_newlineDetected = 0;
+                    newlineDetectedOnce = 0;
+                }
                 if(two_newlineDetected){
                     write(outputFD, newline, 1);
                     write(outputFD, newline, 1);
@@ -290,6 +297,7 @@ int algo(int width, int inputFD, int outputFD){
             count = sb.used;
             sb_reset(&sb);
         }
+        somethingWritten = 1;
     }
 
     write(outputFD, newline, 1);
