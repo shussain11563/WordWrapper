@@ -159,7 +159,6 @@ int main(int argc, char **argv)
        DIR* dirp = opendir(argv[1]);
         struct dirent* de;
         int fileCounter = 0;
-        puts("Hello")
         while(de = readdir(dirp))
         {
 
@@ -169,15 +168,20 @@ int main(int argc, char **argv)
             }
             else //check permission
             {   
-                char* filePathWithWrap = generateFilePath(argv[2], de->d_name, 0); // dir/wrap.test
+                char* filePathWithWrap = generateFilePath(argv[1], de->d_name, 0); // dir/wrap.test
                 struct stat data;
-                int statRet = stat(generateFilePath(argv[2], de->d_name, 0), &data);
+                int statRet = stat(filePathWithWrap, &data);
+                if(statRet==-1)
+                {
+                    return EXIT_FAILURE;
+                }
                 char* sol = generateFilePath("solutions", de->d_name, 1);
 
-            
+             //puts(de->d_name);
                 FILE *fp1 = fopen(filePathWithWrap, "r");
                 FILE *fp2 = fopen(sol, "r");
                 int ch1, ch2;
+                
                 if (fp1 == NULL) 
                 {
                     printf("Cannot open %s for reading ", filePathWithWrap);
@@ -208,7 +212,6 @@ int main(int argc, char **argv)
                 fclose(fp1);
                 fclose(fp2);
                 
-               // return (0);
 
             }
         }
