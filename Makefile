@@ -8,11 +8,10 @@ NO_PERMISSION_FILE= bar
 DIR=some_text
 NO_PERMISSION_DIR=
 EMPTY_DIRECTORY=foo
-BLANK_FILE=blank.txt
+BLANK_FILE=testcases/blank.txt
 DIR_IN_DIR=some_text
-
-
-
+FILE1= pdfExample1 output.txt
+FILE2= solution1 solution1
 
 
 #gcc -g -o -std=c99 -Wall -Wvla -fsanitize=address test.c test
@@ -25,20 +24,26 @@ DIR_IN_DIR=some_text
 
 all: $(OUTPUT)
 
+run:	
+	for FILE in "$$../example";\
+	do echo $$FILE; \
+	done
+
 clean:
 	rm -f *.o $(OUTPUT)
 
 test1: ww
-	./ww 49 RunThis/endgame.txt | cmp RunThis/Solution/endgameSol2.txt 
+	./ww 49 RunThis/endgame.txt | diff RunThis/Solution/endgameSol2.txt -
 
 test2: ww
-	./ww 35 RunThis/bohemianR.txt | cmp RunThis/Solution/bohemianSol1.txt 
+	./ww 35 RunThis/bohemianR.txt | diff RunThis/Solution/bohemianSol1.txt -
 
 test3: ww
-	./ww 24 RunThis/jnjArticle.txt | cmp RunThis/Solution/articleSol1.txt 
+	./ww 24 RunThis/jnjArticle.txt | diff RunThis/Solution/articleSol1.txt -
 
-#test4: ww
-#	./ww 24 RunThis/jnjArticle.txt | diff --normal RunThis/Solution/articleSol1.txt -
+test4: 
+	for FILE in *; 
+	do echo $FILE; done
 
 #Negative Width
 test5: ww
@@ -72,7 +77,7 @@ test11: ww
 test12: ww
 	./ww 20 $(BLANK_FILE)
 
-#DIRECTORY WITHIN A DIRECTORY ALONG WITH FILES
+#DIRECTORY WITHIN A DIRECTORY ALONG WITH FILES (Check to see if algorithm does not recursive into a folder)
 test13: ww
 	./ww 20 $(DIR_IN_DIR)
 
@@ -95,6 +100,23 @@ test16: ww
 #FILE WITH AT LEAST A CHARACTER AT THE END WITH MANY SPACES AND NEW LINES PRECEDING 
 test17: ww
 	./ww 2 $(REG_FILE)
+
+#Creates a new file and runs the program
+test18: ww
+	touch cat.txt
+	./ww 2 cat.txt
+	rm -f cat.txt
+
+#Check for no duplicate "wrap." files and make sure it overwrites the previous "wrap." file 
+test19: ww
+	./ww 40 $(DIRECTORY)
+	./ww 40 $(DIRECTORY)
+
+#Blank File with its cursor anywhere besides line 1
+test20: ww
+	./ww 40 $(DIRECTORY)
+	./ww 40 $(DIRECTORY)
+
 
 
 
