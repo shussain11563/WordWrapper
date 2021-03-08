@@ -210,9 +210,9 @@ int algo(int width, int inputFD, int outputFD){
     int count = 0, newlineDetectedOnce = 0, two_newlineDetected = 0;
 
         // Here to visualize width and compare output.
-    const char dash[1] = {'-'};
-    for(int w=0; w<width; w++) write(outputFD, dash, 1); 
-    write(outputFD, newline, 1);
+    //const char dash[1] = {'-'};
+    //for(int w=0; w<width; w++) write(outputFD, dash, 1); 
+    //write(outputFD, newline, 1);
 
     int bytes = read(inputFD, buffer, BUFSIZE);
     int somethingWritten = 0;
@@ -220,13 +220,15 @@ int algo(int width, int inputFD, int outputFD){
         for(int i=0; i<bytes; i++){
             char c = buffer[i];
             /* Word longer than column width? */
-            if(sb.used > width){ EXIT_STATUS = EXIT_FAILURE;}
-            //if(count >= width){write(outputFD, newline, 1); count = 0;}
+            if(sb.used > width){
+                EXIT_STATUS = EXIT_FAILURE;
+            }
 
             if(c == '\n'){ /* One newline found*/
                 if(!newlineDetectedOnce){
                     newlineDetectedOnce = 1;
                     if(sb.used != 0){ /* This is here to prevent isSpace from writing */
+                        
                         if(sb.used < (width-count) && count != 0){ // if count isn't 0, 
                         //then sb.used has to be less than to include whitespace at beginning
                             write(outputFD, whitespace, 1);
@@ -246,6 +248,10 @@ int algo(int width, int inputFD, int outputFD){
                             write(outputFD, sb.data, sb.used);
                             count = sb.used;
                             sb_reset(&sb);
+                            if(count >= width){
+                                write(outputFD, newline, 1);
+                                count = 0;
+                            }
                         }
                         somethingWritten = 1;
                     }
@@ -274,6 +280,10 @@ int algo(int width, int inputFD, int outputFD){
                     write(outputFD, sb.data, sb.used);
                     count = sb.used;
                     sb_reset(&sb);
+                    if(count >= width){
+                        write(outputFD, newline, 1);
+                        count = 0;
+                    }
                 }
                 somethingWritten = 1;
             }
@@ -283,7 +293,9 @@ int algo(int width, int inputFD, int outputFD){
                     newlineDetectedOnce = 0;
                 }
                 if(two_newlineDetected){
-                    write(outputFD, newline, 1);
+                    if(count!=0){
+                        write(outputFD, newline, 1);
+                    }
                     write(outputFD, newline, 1);
                     count = 0;
                 }
@@ -322,7 +334,7 @@ int algo(int width, int inputFD, int outputFD){
         somethingWritten = 1;
     }
 
-    if(somethingWritten){
+    if(somethingWritten && count!=0){
         write(outputFD, newline, 1);
     }
     sb_destroy(&sb); // clear space allocated for string.
