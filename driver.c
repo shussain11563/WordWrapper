@@ -147,6 +147,8 @@ int prefixContains(char* prefix, char* word)
 
 int main(int argc, char **argv)
 {
+    int fileCounter = 0;
+     int correctMatches = 0;
     
     //Here const char *path specifies the name of the file. If the path of file is a symbolic link then you need to specify the link instead of file name.
     //run command through make
@@ -158,16 +160,15 @@ int main(int argc, char **argv)
     {
        DIR* dirp = opendir(argv[1]);
         struct dirent* de;
-        int fileCounter = 0;
         while(de = readdir(dirp))
         {
-
             if(prefixContains("wrap.", de->d_name)||strcmp(de->d_name,".")==0 || strcmp(de->d_name,"..")==0)
             {
                 continue;
             }
             else //check permission
             {   
+                fileCounter++;
                 char* filePathWithWrap = generateFilePath(argv[1], de->d_name, 0); // dir/wrap.test
                 struct stat data;
                 int statRet = stat(filePathWithWrap, &data);
@@ -205,9 +206,15 @@ int main(int argc, char **argv)
                 }
 
                 if (ch1 == ch2)
-                    printf("Files are identical n");
+                {
+                    printf("Files are identical n\n");
+                    correctMatches++;
+                }
                 else if (ch1 != ch2)
-                    printf("Files are Not identical n");
+                {
+                    printf("Files are Not identical n\n");
+                }
+                    
 
                 fclose(fp1);
                 fclose(fp2);
@@ -218,5 +225,7 @@ int main(int argc, char **argv)
         closedir(dirp);
 
     }
+
+    printf("%d/%d Files Matched\n", correctMatches, fileCounter);
     return 0;
 }
