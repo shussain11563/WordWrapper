@@ -116,8 +116,10 @@ test19: ww
 test20: ww
 	./ww 40 $(DIRECTORY)
 	./ww 40 $(DIRECTORY)
-
-
+#directory inside a directory
+# very large number
+#absolute path
+#relative path
 
 
 
