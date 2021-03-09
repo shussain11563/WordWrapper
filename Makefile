@@ -24,10 +24,12 @@ FILE2= solution1 solution1
 
 all: $(OUTPUT)
 
-run:	
-	for FILE in "$$../example";\
-	do echo $$FILE; \
-	done
+driver: driver.o strbuf.o
+	gcc -g -std=c99 -Wvla -Wall -fsanitize=address,undefined -o driver driver.o strbuf.o
+
+driver.o: driver.c strbuf.h
+	gcc -c -g -std=c99 -Wvla -Wall -fsanitize=address,undefined driver.c
+	
 
 clean:
 	rm -f *.o $(OUTPUT)
@@ -132,6 +134,8 @@ ww.o: ww.c strbuf.h
 
 strbuf.o: strbuf.c strbuf.h
 	gcc -c -g -std=c99 -Wvla -Wall -fsanitize=address,undefined strbuf.c
+
+
 
 
 
