@@ -73,12 +73,23 @@ int main(int argc, char **argv)
                 fileCounter++;
                 char* filePathWithWrap = generateFilePath(argv[1], de->d_name, 0); // dir/wrap.test
                 struct stat data;
+                
                 int statRet = stat(filePathWithWrap, &data);
                 if(statRet==-1)
                 {
-                    return EXIT_FAILURE;
+                    printf("Cannot open %s for reading or does not exist\n", filePathWithWrap);
+                    free(filePathWithWrap);
+                    continue;
                 }
+
                 char* sol = generateFilePath("solutions", de->d_name, 1);
+                int statRetSol = stat(sol, &data);
+                if(statRet==-1)
+                {
+                    printf("Cannot open %s for reading or does not exist\n", sol);
+                    free(sol);
+                    continue;
+                }
 
              //puts(de->d_name);
                 FILE *fp1 = fopen(filePathWithWrap, "r");
@@ -87,12 +98,12 @@ int main(int argc, char **argv)
                 
                 if (fp1 == NULL) 
                 {
-                    printf("Cannot open %s for reading ", filePathWithWrap);
+                    printf("Cannot open %s for reading \n", filePathWithWrap);
                     continue;
                 } 
                 else if (fp2 == NULL) 
                 {
-                    printf("Cannot open %s for reading ", sol);
+                    printf("Cannot open %s for reading \n", sol);
                     continue;
                 } 
                 else 
