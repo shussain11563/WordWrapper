@@ -10,13 +10,6 @@ LFLAGS=-lm
 
 all: $(OUTPUT)
 
-driver: driver.o strbuf.o
-	gcc -g -std=c99 -Wvla -Wall -fsanitize=address,undefined -o driver driver.o strbuf.o
-
-driver.o: driver.c strbuf.h
-	gcc -c -g -std=c99 -Wvla -Wall -fsanitize=address,undefined driver.c
-	
-
 clean:
 	rm -f *.o $(OUTPUT)
 
