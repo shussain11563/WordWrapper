@@ -22,6 +22,13 @@ ww.o: ww.c strbuf.h
 strbuf.o: strbuf.c strbuf.h
 	gcc -c -g -std=c99 -Wvla -Wall -fsanitize=address,undefined strbuf.c
 
+driver: driver.o strbuf.o
+	gcc -g -std=c99 -Wvla -Wall -fsanitize=address,undefined -o driver driver.o strbuf.o
+
+driver.o: driver.c strbuf.h
+	gcc -c -g -std=c99 -Wvla -Wall -fsanitize=address,undefined driver.c
+
+
 
 
 

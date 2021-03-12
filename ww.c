@@ -56,7 +56,7 @@ int main(int argc, char **argv)
         // only stdin to stdout stuff
         // don't have to worry about permissions
         int inputFD = STDIN_FILENO;
-        int outputFD = open("stdoutStorage.txt", O_WRONLY | O_TRUNC | O_CREAT, 0666);
+        int outputFD = open("stdoutStorage.txt", O_WRONLY | O_TRUNC | O_CREAT, 0777);
         EXIT_STATUS = algo(width, inputFD, outputFD);
         close(inputFD);
         close(outputFD);
