@@ -126,7 +126,7 @@ int main(int argc, char **argv)
                     free(newFilePath);
                     continue;
                 }
-                int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO); 
+                int outputFD = open(newFilePath,  O_WRONLY | O_TRUNC | O_CREAT, 0666); 
                 if(outputFD == -1){
                     free(currentPath);
                     free(newFilePath);
